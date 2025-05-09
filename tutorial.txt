@@ -1,0 +1,25 @@
+1. Init virtual environment: 
+python3 -m venv env
+
+2. Install dependencies
+pip install -r requirements.txt
+
+pip
+asgiref
+Django
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+PyJWT
+pytz
+sqlparse
+psycopg2-binary
+python-dotenv
+
+3. Start a backend project
+django-admin startproject backend
+
+4. Start new app in backend
+python manage.py startapp app
+
+5. Make serializers in app
