@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
-        fields = ["id", "user", "increment", "score_value", "time_stamp"]
+        fields = ["id", "user", "increment", "score_value", "last_updated"]
         extra_kwargs = {"user": {"read_only": True}}
 
 

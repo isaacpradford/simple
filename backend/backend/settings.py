@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     "app",
     "rest_framework",
     "corsheaders",
-    "django_extensions"
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -81,6 +81,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "app.context_processors.update_score_context",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -143,7 +144,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-LOGIN_URL = "/login/"
+LOGIN_URL = "login/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

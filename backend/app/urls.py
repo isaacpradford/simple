@@ -1,9 +1,11 @@
-from django.urls import path, include
+from django.urls import path
 from django.contrib.auth.views import LoginView
 from . import views
 
 urlpatterns = [
-    path("", views.purchase_number, name="home"),
+    path("", views.purchase_new_number, name="home"),
+    path("numbers/<int:number_id>/increase/<int:amount>/", views.increase_quantity, name="increase_quantity"),
+    path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
     # path("", include("django.contrib.auth.urls"), name="authentication"), # Login / Logout / Password
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),

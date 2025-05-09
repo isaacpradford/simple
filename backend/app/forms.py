@@ -9,7 +9,6 @@ from django.contrib.auth.forms import UserCreationForm
 class UserLoginForm(forms.Form):
     username = forms.CharField(max_length=150, widget=forms.TextInput)
     password = forms.CharField(widget=forms.PasswordInput)
-    
     class Meta:
         model = User
         fields = ["username", "password"]
@@ -18,14 +17,11 @@ class UserLoginForm(forms.Form):
 class UserRegistrationForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput)
     password = forms.CharField(widget=forms.PasswordInput)
-    
     class Meta: 
         model = User
         fields = ["username", "password"]
         
 class PurchaseNumberForm(forms.Form):
-    quantity = forms.IntegerField(min_value=1, label="Quantity")
-    
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
@@ -39,8 +35,9 @@ class PurchaseNumberForm(forms.Form):
         
     def clean(self):
         cleaned_data = super().clean()
-        quantity = cleaned_data.get("quantity")
-        total_cost = self.next_integer * 2 * quantity
+        # quantity = cleaned_data.get("quantity")
+        total_cost = self.next_integer * 2
+        
         if self.user.score.score_value < total_cost:   
             raise forms.ValidationError("Not enough points to purchase new number.")
 
@@ -50,4 +47,4 @@ class PurchaseNumberForm(forms.Form):
         
     class Meta:
         model = Number
-        fields = ("integer", "quantity")
+        fields = ("integer")

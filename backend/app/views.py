@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -14,31 +14,36 @@ from .models import Score, Number
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("/")
+
     if request.method == "POST":
         form = UserLoginForm(request.POST)
-        
+
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
             user = authenticate(request=request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                
+
                 next_url = request.GET.get("next") or request.POST.get("next")
                 return redirect(next_url if next_url else "/")
-            else: 
+            else:
                 form.add_error(None, "Invalid username or password.")
-                
+
     else:
         form = UserLoginForm()
-        
+
     return render(request, "registration/login.html", {"form": form})
-        
+
 
 def logout_view(request):
     logout(request)
     return redirect("/login")
 
+
+# Test
 # p31s5mikfmgpDxLJuewR
 def register_view(request):
     if request.method == "POST":
@@ -58,11 +63,11 @@ def register_view(request):
 # Form to purchase a new number
 @login_required(login_url="/login/")
 @transaction.atomic  # ensures all functions finish or don't run at all
-def purchase_number(request):
+def purchase_new_number(request):
     form = PurchaseNumberForm(request.POST or None, user=request.user)
+    numbers = request.user.numbers.order_by("-integer")
 
     if request.method == "POST" and form.is_valid():
-        quantity = form.cleaned_data["quantity"]
         next_integer = form.cleaned_data["next_integer"]
         total_cost = form.cleaned_data["total_cost"]
 
@@ -73,19 +78,71 @@ def purchase_number(request):
 
         # Add or update the Number
         number, created = Number.objects.get_or_create(
-            user=request.user, integer=next_integer, defaults={"quantity": quantity}
+            user=request.user, integer=next_integer, defaults={"quantity": 1}
         )
         if not created:
-            number.quantity += quantity
+            number.quantity += 1
             number.save()
 
-        numbers = request.user.numbers.all()
         score.increment = sum(n.integer * n.quantity for n in numbers)
-        score.svae()
+        score.save()
 
         return redirect("/")
 
-    return render(request, "app/home.html", {"form": form})
+    return render(
+        request,
+        "app/home.html",
+        {
+            "form": form,
+            "numbers": numbers,
+            "last_updated": request.user.score.last_updated,
+        },
+    )
+
+
+# Form to update a number
+@login_required(login_url="/login/")
+@transaction.atomic
+def increase_quantity(request, number_id, amount):
+    number = get_object_or_404(Number, id=number_id, user=request.user)
+    cost = number.integer * amount * 2  # Cost of any number is twice it's own size
+    score = request.user.score
+
+    if score.score_value >= cost:
+        score.score_value -= cost
+        score.save()
+
+        number.quantity += amount
+        number.save()
+
+        numbers = request.user.numbers.all()
+        score.increment = sum(n.integer * n.quantity for n in numbers)
+        score.save()
+    # else:
+    # raise ValidationError("Not enough points to purchase new number.")
+
+    return redirect("/")
+
+
+@login_required(login_url="/login/")
+@transaction.atomic
+def decrease_quantity(request, number_id, amount):
+    number = get_object_or_404(Number, id=number_id, user=request.user)
+    cost = number.integer * amount * 2  # The cost of any number is twice it's own size
+    score = request.user.score
+
+    if number.quantity - amount >= 0:
+        score.score_value += cost
+        score.save()
+
+        number.quantity -= amount
+        number.save()
+
+        numbers = request.user.numbers.all()
+        score.increment = sum(n.integer * n.quantity for n in numbers)
+        score.save()
+
+    return redirect("/")
 
 
 class CreateUser(generics.CreateAPIView):

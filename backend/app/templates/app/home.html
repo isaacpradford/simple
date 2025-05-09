@@ -1,19 +1,67 @@
-{% extends 'base.html' %}
-
-{% block title %} 
-Home 
-{% endblock %}
+{% extends 'base.html' %} {% block title %} Home {% endblock %} 
 
 {% block content %}
-<h1>Your score: {{user.score.score_value}}</h1>
-<h1>{{user.score.increment}}</h1>
+<h1>Your score: <span id="user-score">{{user.score.score_value}}</span></h1>
+<h1><span id="user-increment">{{user.score.increment}}</span></h1>
+<h2>Next Update in: <span id="increment-countdown"></span></h2>
 
-<h2>Purchase Next Number ({{ form.next_integer }})</h2>
+<h2>Next Number: {{ form.next_integer }}</h2>
 
 <form method="post">
   {% csrf_token %} {{ form.as_p }}
   <button type="submit">Purchase</button>
 </form>
+
+<h2>Your numbers</h2>
+<ul>
+  {% for number in numbers %}
+  <li>
+    {{ number.integer}} x {{ number.quantity }}
+    <form method="post" action="{% url 'increase_quantity' number.id 1 %}">
+      {% csrf_token %} <button type="submit">+1</button>
+    </form>
+
+    <form method="post" action="{% url 'increase_quantity' number.id 10 %}">
+      {% csrf_token %} <button type="submit">+10</button>
+    </form>
+
+    <form method="post" action="{% url 'decrease_quantity' number.id 1 %}">
+      {% csrf_token %} <button type="submit">-1</button>
+    </form>
+
+    <form method="post" action="{% url 'decrease_quantity' number.id 10 %}">
+      {% csrf_token %} <button type="submit">-10</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+
+<script>
+  const updateInterval = 15 * 1000 // 1500 ms
+  const incrementAmount = BigInt("{{ user.score.increment }}")
+  
+  let baseScore = BigInt("{{ user.score.score_value }}")
+  let lastUpdated = new Date("{{ last_updated|date:'c' }}")
+
+  function updateCountdown() {
+    const now = new Date();
+    const elapsed = now - lastUpdated // How much time has passed between last update and now?
+
+    // How many intervals of 15s have passed since last update?
+    const increments = Math.floor(elapsed / updateInterval);
+
+    // Update score
+    const predictedScore = baseScore + (incrementAmount * BigInt(increments));
+    document.getElementById("user-score").textContent = predictedScore.toString();
+
+    // Update countdown
+    const timeLeft = updateInterval - (elapsed % updateInterval);
+    const secondsLeft = Math.ceil(timeLeft / 1000);
+    document.getElementById("increment-countdown").textContent = secondsLeft;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+</script>
+
 {% endblock %}
-
-
