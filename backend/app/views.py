@@ -63,7 +63,7 @@ def register_view(request):
 # Form to purchase a new number
 @login_required(login_url="/login/")
 @transaction.atomic  # ensures all functions finish or don't run at all
-def purchase_new_number(request):
+def render_home(request):
     form = PurchaseNumberForm(request.POST or None, user=request.user)
     numbers = request.user.numbers.order_by("-integer")
 

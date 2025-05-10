@@ -1,63 +1,100 @@
 {% extends 'base.html' %} {% block title %} Home {% endblock %} 
-
 {% block content %}
-<h1>Your score: <span id="user-score">{{user.score.score_value}}</span></h1>
-<h1><span id="user-increment">{{user.score.increment}}</span></h1>
-<h2>Next Update in: <span id="increment-countdown"></span></h2>
+<style>
+  #timer-circle {
+    transition: background-color 0.2s linear;
+  }
+  
+  #timer-hand {
+    transition: 1s linear;
+    width: 2px;
+    height: 50%;
+    background-color: black;
+    transform-origin: bottom center;
+    transform: rotate(0deg);
+  }
+  </style>
+  
+<div class="d-flex flex-column justify-content-center align-items-center p-5">
+  <h1 class="display-1"><span id="user-score">{{user.score.score_value}}</span></h1>
+  <h4 class="display-3"><span id="user-increment">{{user.score.increment}} / 15s</span></h4>
+  <h2><span id="increment-countdown"></span></h2>
 
-<h2>Next Number: {{ form.next_integer }}</h2>
+  <div style="height: 10px; width: 400px;" class="position-relative" id="timer">
+    <div style="border: 1px solid black; width: 400px; height: 10px;" class="position-absolute" id="timer-outline"></div>
+    <div style="height: 10px; width: 400px; transition: 1s linear;" class="bg-black position-absolute" id="timer-bar"></div>
+  </div>
+</div>
 
-<form method="post">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit">Purchase</button>
-</form>
+<div class="d-flex flex-column justify-content-center align-items-center p-5">
+  <h2>Next Number: {{ form.next_integer }}</h2>
 
-<h2>Your numbers</h2>
-<ul>
+  <form method="post">
+    {% csrf_token %} {{ form.as_p }}
+    <button type="submit">Purchase</button>
+  </form>
+</div>
+
+<ul class="d-flex flex-row flex-wrap gap-2 p-0">
   {% for number in numbers %}
-  <li>
-    {{ number.integer}} x {{ number.quantity }}
-    <form method="post" action="{% url 'increase_quantity' number.id 1 %}">
-      {% csrf_token %} <button type="submit">+1</button>
-    </form>
+  <li
+    class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25"
+  >
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h5>{{ number.integer}}</h5>
+      <p>{{ number.quantity }}</p>
+    </div>
 
-    <form method="post" action="{% url 'increase_quantity' number.id 10 %}">
-      {% csrf_token %} <button type="submit">+10</button>
-    </form>
+    <div class="d-flex flex-row gap-2">
+      <div class="d-flex flex-row">
+        <form method="post" action="{% url 'increase_quantity' number.id 1 %}">
+          {% csrf_token %} <button type="submit">+1</button>
+        </form>
 
-    <form method="post" action="{% url 'decrease_quantity' number.id 1 %}">
-      {% csrf_token %} <button type="submit">-1</button>
-    </form>
+        <form method="post" action="{% url 'increase_quantity' number.id 10 %}">
+          {% csrf_token %} <button type="submit">+10</button>
+        </form>
+      </div>
 
-    <form method="post" action="{% url 'decrease_quantity' number.id 10 %}">
-      {% csrf_token %} <button type="submit">-10</button>
-    </form>
+      <div class="d-flex flex-row">
+        <form method="post" action="{% url 'decrease_quantity' number.id 1 %}">
+          {% csrf_token %} <button type="submit">-1</button>
+        </form>
+
+        <form method="post" action="{% url 'decrease_quantity' number.id 10 %}">
+          {% csrf_token %} <button type="submit">-10</button>
+        </form>
+      </div>
+    </div>
   </li>
   {% endfor %}
 </ul>
 
 <script>
-  const updateInterval = 15 * 1000 // 1500 ms
-  const incrementAmount = BigInt("{{ user.score.increment }}")
-  
-  let baseScore = BigInt("{{ user.score.score_value }}")
-  let lastUpdated = new Date("{{ last_updated|date:'c' }}")
+  const updateInterval = 15 * 1000; // 1500 ms
+  const incrementAmount = BigInt("{{ user.score.increment }}");
+
+  let baseScore = BigInt("{{ user.score.score_value }}");
+  let lastUpdated = new Date("{{ last_updated|date:'c' }}");
 
   function updateCountdown() {
     const now = new Date();
-    const elapsed = now - lastUpdated // How much time has passed between last update and now?
+    const elapsed = now - lastUpdated; // How much time has passed between last update and now?
 
     // How many intervals of 15s have passed since last update?
     const increments = Math.floor(elapsed / updateInterval);
 
     // Update score
-    const predictedScore = baseScore + (incrementAmount * BigInt(increments));
-    document.getElementById("user-score").textContent = predictedScore.toString();
+    const predictedScore = baseScore + incrementAmount * BigInt(increments);
+    document.getElementById("user-score").textContent =
+      predictedScore.toString();
 
     // Update countdown
     const timeLeft = updateInterval - (elapsed % updateInterval);
-    const secondsLeft = Math.ceil(timeLeft / 1000);
-    document.getElementById("increment-countdown").textContent = secondsLeft;
+    secondsLeft = Math.ceil(timeLeft / 1000);
+    // document.getElementById("increment-countdown").textContent = secondsLeft;
+
+    document.getElementById('timer-bar').style.width = ((1.0666666 - (secondsLeft / 15)) * 100 + "%");
   }
 
   updateCountdown();
