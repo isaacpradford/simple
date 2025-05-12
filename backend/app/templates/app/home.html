@@ -1,41 +1,62 @@
-{% extends 'base.html' %} {% block title %} Home {% endblock %} 
+{% extends 'base.html' %} {% block title %} Home {% endblock %}
 {% block content %}
+
 <style>
-  #timer-circle {
-    transition: background-color 0.2s linear;
+  .response-message {
+    animation: floatAndFade 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 10;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transform: translate(0, 0) rotate(0);
   }
-  
-  #timer-hand {
-    transition: 1s linear;
-    width: 2px;
-    height: 50%;
-    background-color: black;
-    transform-origin: bottom center;
-    transform: rotate(0deg);
+
+  @keyframes floatAndFade {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rotation));
+    }
   }
-  </style>
-  
+</style>
+
 <div class="d-flex flex-column justify-content-center align-items-center p-5">
-  <h1 class="display-1"><span id="user-score">{{user.score.score_value}}</span></h1>
-  <h4 class="display-3"><span id="user-increment">{{user.score.increment}} / 15s</span></h4>
+  <h1 class="display-1"><span id="user-score"></span></h1>
+  <h5>
+    <span id="user-increment">{{user.score.increment}} / 15s</span>
+  </h5>
   <h2><span id="increment-countdown"></span></h2>
 
-  <div style="height: 10px; width: 400px;" class="position-relative" id="timer">
-    <div style="border: 1px solid black; width: 400px; height: 10px;" class="position-absolute" id="timer-outline"></div>
-    <div style="height: 10px; width: 400px; transition: 1s linear;" class="bg-black position-absolute" id="timer-bar"></div>
+  <div style="height: 10px; width: 400px" class="position-relative" id="timer">
+    <div
+      style="border: 1px solid black; width: 400px; height: 10px"
+      class="position-absolute"
+      id="timer-outline"
+    ></div>
+    <div
+      style="height: 10px; width: 0px; transition: 0.2s linear"
+      class="bg-black position-absolute"
+      id="timer-bar"
+    ></div>
   </div>
 </div>
 
 <div class="d-flex flex-column justify-content-center align-items-center p-5">
-  <h2>Next Number: {{ form.next_integer }}</h2>
+  <h2>Next Number: <span id="next-number">{{ form.next_integer }}</span></h2>
 
-  <form method="post">
-    {% csrf_token %} {{ form.as_p }}
-    <button type="submit">Purchase</button>
-  </form>
+  <button id="purchase-next-number" class="purchase-next-number btn btn-sm">
+    Purchase
+  </button>
 </div>
 
-<ul class="d-flex flex-row flex-wrap gap-2 p-0">
+<button id="purchase-next-button" class="btn btn-sm">
+  Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+</button>
+
+<ul id="number-list" class="d-flex flex-row flex-wrap gap-2 p-0">
   {% for number in numbers %}
   <li
     class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25"
@@ -46,59 +67,302 @@
     </div>
 
     <div class="d-flex flex-row gap-2">
-      <div class="d-flex flex-row">
-        <form method="post" action="{% url 'increase_quantity' number.id 1 %}">
-          {% csrf_token %} <button type="submit">+1</button>
-        </form>
+      <div class="d-flex flex-row btn-group">
+        {% for amount in buttons %}
+        <button
+          data-action="increase"
+          data-id="{{ number.id }}"
+          data-amount="{{ amount }}"
+          class="update-button btn btn-sm"
+        >
+          +{{ amount }}
+        </button>
+        {% endfor %}
 
-        <form method="post" action="{% url 'increase_quantity' number.id 10 %}">
-          {% csrf_token %} <button type="submit">+10</button>
-        </form>
+        <div class="d-flex flex-row btn-group">
+          {% for amount in buttons %}
+          <button
+            data-action="decrease"
+            data-id="{{ number.id }}"
+            data-amount="{{ amount }}"
+            class="update-button btn btn-sm"
+          >
+            -{{ amount }}
+          </button>
+          {% endfor %}
+        </div>
       </div>
 
-      <div class="d-flex flex-row">
-        <form method="post" action="{% url 'decrease_quantity' number.id 1 %}">
-          {% csrf_token %} <button type="submit">-1</button>
-        </form>
-
-        <form method="post" action="{% url 'decrease_quantity' number.id 10 %}">
-          {% csrf_token %} <button type="submit">-10</button>
-        </form>
-      </div>
+      <!-- <button
+        data-action="increase"
+        data-id="{{ number.id }}"
+        data-amount="10"
+        class="update-button btn btn-sm"
+      >
+        +10
+      </button> -->
+      <!-- <div class="d-flex flex-row btn-group">
+        <button
+          data-action="decrease"
+          data-id="{{ number.id }}"
+          data-amount="1"
+          class="update-button btn btn-sm"
+        >
+          -1
+        </button>
+        <button
+          data-action="decrease"
+          data-id="{{ number.id }}"
+          data-amount="10"
+          class="update-button btn btn-sm"
+        >
+          -10
+        </button>
+      </div> -->
     </div>
   </li>
   {% endfor %}
 </ul>
 
 <script>
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   const updateInterval = 15 * 1000; // 1500 ms
-  const incrementAmount = BigInt("{{ user.score.increment }}");
+  let lastScoreUpdate = Date.now();
 
-  let baseScore = BigInt("{{ user.score.score_value }}");
-  let lastUpdated = new Date("{{ last_updated|date:'c' }}");
+  function playMessageAnimation(success, button, message) {
+    const rect = button.getBoundingClientRect();
+    const msg = document.createElement("div");
+    msg.classList.add("response-message");
+    msg.textContent = message;
 
-  function updateCountdown() {
-    const now = new Date();
-    const elapsed = now - lastUpdated; // How much time has passed between last update and now?
+    // Position relative to the button
+    msg.style.left = `${rect.left + rect.width / 2}px`;
+    msg.style.top = `${rect.top - 10}px`;
+    msg.style.position = "fixed";
 
-    // How many intervals of 15s have passed since last update?
-    const increments = Math.floor(elapsed / updateInterval);
+    msg.style.color = success ? "green" : "red";
 
-    // Update score
-    const predictedScore = baseScore + incrementAmount * BigInt(increments);
-    document.getElementById("user-score").textContent =
-      predictedScore.toString();
+    const angle = 45 + Math.random() * 90; // Random angle from 45-135
+    const distance = -100; // Pixels
+    const angleRad = (angle * Math.PI) / 180;
+    const dx = Math.cos(angleRad) * distance;
+    const dy = Math.sin(angleRad) * distance;
 
-    // Update countdown
-    const timeLeft = updateInterval - (elapsed % updateInterval);
-    secondsLeft = Math.ceil(timeLeft / 1000);
-    // document.getElementById("increment-countdown").textContent = secondsLeft;
+    const rotation = Math.random() * 60 - 30;
 
-    document.getElementById('timer-bar').style.width = ((1.0666666 - (secondsLeft / 15)) * 100 + "%");
+    msg.style.setProperty("--dx", `${dx}px`);
+    msg.style.setProperty("--dy", `${dy}px`);
+    msg.style.setProperty("--rotation", `${rotation}deg`);
+
+    document.body.appendChild(msg);
+
+    setTimeout(() => {
+      msg.remove();
+    }, 2000);
   }
 
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+  // Display and show purchased buttons (increments of 1^10x)
+  document
+    .getElementById("purchase-next-button")
+    .addEventListener("click", async (e) => {
+      try {
+        const response = await fetch('{% url "purchase_button" %}', {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById("user-score").textContent = data.new_score;
+
+          const newAmount = data.new_button_amount;
+
+          const increaseBtn = document.createElement("button");
+          increaseBtn.className = "update-button btn btn-sm";
+          increaseBtn.textContent = `+${newAmount}`;
+          increaseBtn.dataset.action = "increase";
+          increaseBtn.dataset.id = data.number_id;
+          increaseBtn.dataset.amount = newAmount;
+
+          const decreaseBtn = document.createElement("button");
+          decreaseBtn.className = "update-button btn btn-sm";
+          decreaseBtn.textContent = `-${newAmount}`;
+          decreaseBtn.dataset.action = "decrease";
+          decreaseBtn.dataset.id = data.number_id;
+          decreaseBtn.dataset.amount = newAmount;
+
+          const groups = li.querySelectorAll(".btn-group");
+          if (groups.length >= 2) {
+            groups[0].appendChild(increaseBtn);
+            groups[1].appendChild(decreaseBtn);
+          }
+
+          playMessageAnimation(
+            true,
+            document.getElementById("purchase-next-button"),
+            data.message
+          );
+        } else {
+          playMessageAnimation(
+            false,
+            document.getElementById("purchase-next-button"),
+            data.message
+          );
+        }
+      } catch (err) {}
+    });
+
+  // Add event listeners to all the numbers and their buttons
+  document
+    .getElementById("number-list")
+    .addEventListener("click", async (e) => {
+      const button = e.target.closest(".update-button");
+      if (!button) return;
+      
+      const numberId = button.dataset.id;
+      const action = button.dataset.action;
+      const amount = button.dataset.amount;
+      const url = `numbers/${numberId}/${action}/${amount}/`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById("user-score").textContent = data.new_score;
+          document.getElementById("user-increment").textContent =
+            data.new_increment + " / 15s";
+          button.closest("li").querySelector("p").textContent =
+            data.new_quantity;
+          playMessageAnimation(data.success, e.target, data.message);
+        } else {
+          playMessageAnimation(data.success, e.target, data.message);
+        }
+      } catch (err) {
+        console.error("Error", err);
+      }
+    });
+
+  // Purchase the next number available
+  const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
+  document
+    .getElementById("purchase-next-number")
+    .addEventListener("click", async (e) => {
+      try {
+        const response = await fetch("{% url 'purchase_number' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          playMessageAnimation(data.success, e.target, data.message);
+          document.getElementById("user-score").textContent = data.new_score;
+          document.getElementById("user-increment").textContent =
+            data.new_increment + " / 15s";
+          document.getElementById("next-number").textContent =
+            data.next_purchase;
+
+          // Dynamic +/- buttons 
+          const increaseButtons = buttonAmounts
+            .map(
+              (amount) => `
+            <button
+              data-action="increase"
+              data-id="${data.number_id}"
+              data-amount="${amount}"
+              class="update-button btn btn-sm"
+            >
+              +${amount}
+            </button>
+          `
+            )
+            .join("");
+
+          const decreaseButtons = buttonAmounts
+            .map(
+              (amount) => `
+            <button
+              data-action="decrease"
+              data-id="${data.number_id}"
+              data-amount="${amount}"
+              class="update-button btn btn-sm"
+            >
+              -${amount}
+            </button>
+          `
+            )
+            .join("");
+
+          const newHTML = 
+          `
+          <li class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25">
+            <div class="d-flex flex-column justify-content-center align-items-center">
+              <h5>${data.new_number}</h5>
+              <p>1</p>
+            </div>
+            <div class="d-flex flex-row gap-2">
+              <div class="d-flex flex-row btn-group">
+                ${increaseButtons}
+              </div>
+              <div class="d-flex flex-row btn-group">
+                ${decreaseButtons}
+              </div>
+            </div>
+          </li>
+        `;
+
+          document
+            .getElementById("number-list")
+            .insertAdjacentHTML("afterbegin", newHTML);
+        } else {
+          playMessageAnimation(data.success, e.target, data.message);
+        }
+      } catch (error) {
+        console.error(error);
+        playMessageAnimation(false, e.target, "Something went wrong.");
+      }
+    });
+
+  function updateScore() {
+    fetch("{% url 'predicted_score' %}")
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("user-score").textContent = data.score;
+        document.getElementById(
+          "user-increment"
+        ).textContent = `${data.increment} / 15s`;
+        lastScoreUpdate = Date.now();
+      });
+  }
+
+  function updateTimer() {
+    const now = Date.now();
+    const elapsed = now - lastScoreUpdate;
+    const progress = (elapsed % updateInterval) / updateInterval;
+    const width = progress * 100;
+
+    document.getElementById("timer-bar").style.width = `${width}%`;
+  }
+
+  updateScore();
+  setInterval(updateScore, updateInterval); // Update score once every 15s
+  setInterval(updateTimer, 200); // Update the timer every 1s
 </script>
 
 {% endblock %}

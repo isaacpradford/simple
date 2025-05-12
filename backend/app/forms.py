@@ -48,3 +48,12 @@ class PurchaseNumberForm(forms.Form):
     class Meta:
         model = Number
         fields = ("integer")
+        
+        
+class PurchaseButtonForm(forms.Form):
+    def __init__(self, * args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.next_button = self.user.score.purchased_buttons + 1
+        
+    # def 

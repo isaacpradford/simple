@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
-        Score.objects.create(user=user, score_value=0)  # auto create their score
+        Score.objects.create(user=user, score_value=1)  # auto create their score
         Number.objects.create(user=user, integer=1, quantity=1)
         return user
 
@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
-        fields = ["id", "user", "increment", "score_value", "last_updated"]
+        fields = ["id", "user", "score_value", "increment", "time_increment", "purchased_buttons", "last_updated"]
         extra_kwargs = {"user": {"read_only": True}}
 
 

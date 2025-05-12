@@ -4,11 +4,17 @@ from . import views
 
 urlpatterns = [
     path("", views.render_home, name="home"),
-    path("numbers/<int:number_id>/increase/<int:amount>/", views.increase_quantity, name="increase_quantity"),
-    path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("register/", views.register_view, name="register"),
+    
+    path("numbers/purchase_number/", views.purchase_number, name="purchase_number"),
+    path("numbers/<int:number_id>/increase/<int:amount>/", views.increase_quantity, name="increase_quantity"),
+    path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
+    
+    path("button/purchase_button/", views.purchase_button, name="purchase_button"),
+    
+    path("api/predicted_score", views.get_predicted_score, name="predicted_score")
     
     # path("score/read/", views.ListScore.as_view(), name="read-score"),
     # path("score/update/<int:pk>/", views.UpdateScore.as_view(), name="update-score"),

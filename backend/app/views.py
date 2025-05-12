@@ -1,17 +1,31 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
 
 from django.db import transaction
+from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+
+from decimal import Decimal
+from datetime import timedelta
 
 from .serializers import UserSerializer, ScoreSerializer, NumberSerializer
 from .forms import UserLoginForm, UserRegistrationForm, PurchaseNumberForm
 from .models import Score, Number
 
+def update_score_if_needed(request):
+    if request.user.is_authenticated and hasattr(request.user, "score"):
+        score = request.user.score
+        now = timezone.now()
+        elapsed = (now - score.last_updated).total_seconds()
+        
+        if elapsed >=15:
+            ticks = int (elapsed // 15)
+            score.score_value += score.increment * ticks
+            score.last_updated += timedelta(seconds=15 * ticks)
+            score.save()
+        
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -66,7 +80,11 @@ def register_view(request):
 def render_home(request):
     form = PurchaseNumberForm(request.POST or None, user=request.user)
     numbers = request.user.numbers.order_by("-integer")
-
+    buttons = [10 ** i for i in range(request.user.score.purchased_buttons)]
+    next_button = max(n for n in buttons) * 10
+    next_button_cost = next_button * 10
+    update_score_if_needed(request)
+    
     if request.method == "POST" and form.is_valid():
         next_integer = form.cleaned_data["next_integer"]
         total_cost = form.cleaned_data["total_cost"]
@@ -95,15 +113,64 @@ def render_home(request):
         {
             "form": form,
             "numbers": numbers,
+            "buttons": buttons,
+            "next_button": next_button,
+            "next_button_cost": next_button_cost,
             "last_updated": request.user.score.last_updated,
         },
     )
 
+@login_required
+@require_POST
+@transaction.atomic
+def purchase_number(request):
+    update_score_if_needed(request)
+    user_numbers = request.user.numbers.all()
+    next_number =  max(n.integer for n in user_numbers) * 2
+    cost = next_number * 2
+    score = request.user.score
+    
+    if request.user.score.score_value < cost:
+        return JsonResponse({"success": False, "message": "Not enough points!"}, status=400)
+    else: 
+        score.score_value -= cost
+        score.increment += next_number
+        score.save()
+        
+        number = Number.objects.create(user=request.user, integer=next_number)
+        number.save()
+        
+        return JsonResponse({
+            "success": True, 
+            "message": '+' + str(next_number),
+            "new_score": str(score.score_value),
+            "new_increment": str(score.increment),
+            "new_number": str(number.integer),
+            "number_id": number.id,
+            "next_purchase": str(cost),
+        })
 
-# Form to update a number
+
+# Get the estimated score
 @login_required(login_url="/login/")
+def get_predicted_score(request):
+    update_score_if_needed(request)
+    score = request.user.score
+    elapsed = (timezone.now() - score.last_updated).total_seconds()
+    increments = elapsed // 15
+    predicted_score = score.score_value + score.increment * Decimal(increments)
+    
+    return JsonResponse({
+        "score": str(predicted_score),
+        "increment": str(score.increment),
+        "last_updated": score.last_updated.isoformat()
+    })
+
+@login_required(login_url="/login/")
+@require_POST
 @transaction.atomic
 def increase_quantity(request, number_id, amount):
+    update_score_if_needed(request)
     number = get_object_or_404(Number, id=number_id, user=request.user)
     cost = number.integer * amount * 2  # Cost of any number is twice it's own size
     score = request.user.score
@@ -118,15 +185,22 @@ def increase_quantity(request, number_id, amount):
         numbers = request.user.numbers.all()
         score.increment = sum(n.integer * n.quantity for n in numbers)
         score.save()
-    # else:
-    # raise ValidationError("Not enough points to purchase new number.")
 
-    return redirect("/")
+        return JsonResponse({
+            "success": True,
+            "message": "+" + str(amount),
+            "new_quantity": number.quantity,
+            "new_score": str(score.score_value),
+            "new_increment": str(score.increment) # Return strings so that Javascript doesn't ruin big numbers
+        })
+
+    return JsonResponse({"success": False, "message": "Not enough points!"}, status=400)
 
 
 @login_required(login_url="/login/")
 @transaction.atomic
 def decrease_quantity(request, number_id, amount):
+    update_score_if_needed(request)
     number = get_object_or_404(Number, id=number_id, user=request.user)
     cost = number.integer * amount * 2  # The cost of any number is twice it's own size
     score = request.user.score
@@ -141,133 +215,35 @@ def decrease_quantity(request, number_id, amount):
         numbers = request.user.numbers.all()
         score.increment = sum(n.integer * n.quantity for n in numbers)
         score.save()
-
-    return redirect("/")
-
-
-class CreateUser(generics.CreateAPIView):
-    queryset = User.objects.all()  # Look at the existing users
-    serializer_class = UserSerializer
-    permission_classes = [AllowAny]  # Allow anyone to create a new user
-
-
-# score is auto-created when user is created
-class ListScore(generics.ListAPIView):
-    serializer_class = ScoreSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Score.objects.filter(user=self.request.user)
+        
+        return JsonResponse({
+            "success": True,
+            "message": "-" + str(amount),
+            "new_quantity": number.quantity,
+            "new_score": str(score.score_value),
+            "new_increment": str(score.increment)
+        })
+    else:
+        return JsonResponse({"success": False, "message": "Need more!"}, status=400)
 
 
-class RetrieveScore(generics.ListAPIView):
-    serializer_class = ScoreSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user.score
-
-
-class UpdateScore(generics.UpdateAPIView):
-    serializer_class = ScoreSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Score.objects.filter(user=self.request.user)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        score_value = request.data.get("score_value")
-        increment = request.data.get("increment")
-
-        try:
-            instance.score_value = score_value
-            instance.increment = increment
-            instance.save()
-        except ValueError:
-            return Response(
-                {"error": "score_value is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class CreateNumber(generics.ListCreateAPIView):
-    serializer_class = NumberSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Number.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-
-        if serializer.is_valid():
-            serializer.save(user=user)
-
-            # Update the score with the new data passed in
-            new_score = self.request.data.get("new_score")
-            new_increment = self.request.data.get("new_increment")
-
-            score = Score.objects.get(user=user)
-            score.increment = new_increment
-            score.score_value = new_score
-
-            score.save()
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UpdateNumber(generics.UpdateAPIView):
-    serializer_class = NumberSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = "pk"
-
-    def get_queryset(self):  # Get all the numbers of one user
-        return Number.objects.filter(user=self.request.user)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            # Update the score with the new data passed in
-            new_score = self.request.data.get("new_score")
-            new_increment = self.request.data.get("new_increment")
-            score = Score.objects.get(user=self.request.user)
-
-            score.increment = new_increment
-            score.score_value = new_score
-
-            score.save()
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ListNumbers(generics.ListAPIView):
-    serializer_class = NumberSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Number.objects.filter(user=self.request.user)
-
-
-class DeleteNumber(generics.DestroyAPIView):
-    serializer_class = NumberSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = "pk"
-
-    def get_queryset(self):
-        return Number.objects.filter(user=self.request.user)
-
-    # For overriding default destroy function
-    # def destroy(self, request, *args, **kwargs):
-    # instance = self.get_object()
-    # self.perform_destroy(instance)
-    # return Response({"message": "Number deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+@login_required(login_url="/login/")
+@transaction.atomic
+def purchase_button(request):
+    score = request.user.score
+    current_buttons = score.purchased_buttons
+    
+    cost = Decimal(10) ** (current_buttons + 1)
+    if score.score_value < cost:
+        return JsonResponse({"success": False, "message": "Not enough points!"})
+    
+    score.score_value -= cost
+    score.purchased_buttons += 1
+    score.save()
+    
+    return JsonResponse({
+        "success": True,
+        "new_score": str(score.score_value),
+        "new_button_amount": 10 ** score.purchased_buttons,
+        "message": f"Unlocked +/- {10 ** score.purchased_buttons}"
+    })

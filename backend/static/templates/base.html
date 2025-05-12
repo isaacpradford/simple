@@ -10,11 +10,13 @@
       integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
       crossorigin="anonymous"
     />
+    {% if user.is_authenticated %} <meta name="csrf-token" content="{{ csrf_token }}"> {% endif %}
     <style>
       body, html {
         height: 100%;
       }
       main {
+        z-index: 0;
         min-height: calc(100vh - 70px);
       }
     </style>
