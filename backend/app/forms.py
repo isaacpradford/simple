@@ -1,6 +1,6 @@
 from django import forms
 from decimal import Decimal
-from .models import Score, Number
+from .models import Number
 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm

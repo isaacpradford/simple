@@ -26,8 +26,10 @@
 <div class="d-flex flex-column justify-content-center align-items-center p-5">
   <h1 class="display-1"><span id="user-score"></span></h1>
   <h5>
-    <span id="user-increment">{{user.score.increment}} / 15s</span>
+    <span id="user-increment">{{user.score.increment}} / </span>
+    <span id="time-increment">{{ user.score.time_increment }}</span>
   </h5>
+
   <h2><span id="increment-countdown"></span></h2>
 
   <div style="height: 10px; width: 400px" class="position-relative" id="timer">
@@ -52,9 +54,13 @@
   </button>
 </div>
 
-<button id="purchase-next-button" class="btn btn-sm">
-  Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
-</button>
+<div>
+  <button id="purchase-next-button" class="btn btn-sm">
+    Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+  </button>
+  
+  <button id="purchase-next-second" class="btn btn-sm"> -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)</button>
+</div>
 
 <ul id="number-list" class="d-flex flex-row flex-wrap gap-2 p-0">
   {% for number in numbers %}
@@ -92,33 +98,6 @@
           {% endfor %}
         </div>
       </div>
-
-      <!-- <button
-        data-action="increase"
-        data-id="{{ number.id }}"
-        data-amount="10"
-        class="update-button btn btn-sm"
-      >
-        +10
-      </button> -->
-      <!-- <div class="d-flex flex-row btn-group">
-        <button
-          data-action="decrease"
-          data-id="{{ number.id }}"
-          data-amount="1"
-          class="update-button btn btn-sm"
-        >
-          -1
-        </button>
-        <button
-          data-action="decrease"
-          data-id="{{ number.id }}"
-          data-amount="10"
-          class="update-button btn btn-sm"
-        >
-          -10
-        </button>
-      </div> -->
     </div>
   </li>
   {% endfor %}
@@ -126,7 +105,8 @@
 
 <script>
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-  const updateInterval = 15 * 1000; // 1500 ms
+  let time = document.getElementById('time-increment').textContent;
+  const updateInterval = time * 1000; // users time increment in ms
   let lastScoreUpdate = Date.now();
 
   function playMessageAnimation(success, button, message) {
@@ -161,7 +141,35 @@
     }, 2000);
   }
 
-  // Display and show purchased buttons (increments of 1^10x)
+  // Purchase Time
+  document.getElementById("purchase-next-second").addEventListener('click', async (e) => {
+    try {
+      const response = await fetch("{% url 'purchase_time'%}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+        }
+      })
+
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById("user-score").textContent = data.new_score;
+        document.getElementById("time-increment").textContent = data.new_timer;
+        document.getElementById("next-second-cost").textContent = data.new_timer_cost;
+        time = data.new_timer;
+        playMessageAnimation(data.success, document.getElementById("purchase-next-second"), data.message);
+      } else {
+        playMessageAnimation(data.success, document.getElementById("purchase-next-second"), data.message);
+      }
+
+    } catch (err) {
+      playMessageAnimation(false, document.getElementById("purchase-next-second"), err);
+    }
+  })
+
+  // Purchase Button: Display and show purchased buttons (increments of 1^10x)
   document
     .getElementById("purchase-next-button")
     .addEventListener("click", async (e) => {
@@ -216,7 +224,7 @@
       } catch (err) {}
     });
 
-  // Add event listeners to all the numbers and their buttons
+  // Purchase quantity: Add event listeners to all the numbers and their buttons
   document
     .getElementById("number-list")
     .addEventListener("click", async (e) => {
@@ -242,7 +250,7 @@
         if (data.success) {
           document.getElementById("user-score").textContent = data.new_score;
           document.getElementById("user-increment").textContent =
-            data.new_increment + " / 15s";
+            data.new_increment + " /";
           button.closest("li").querySelector("p").textContent =
             data.new_quantity;
           playMessageAnimation(data.success, e.target, data.message);
@@ -254,7 +262,7 @@
       }
     });
 
-  // Purchase the next number available
+  // Purchase Number: Purchase the next number available
   const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
   document
     .getElementById("purchase-next-number")
@@ -274,7 +282,7 @@
           playMessageAnimation(data.success, e.target, data.message);
           document.getElementById("user-score").textContent = data.new_score;
           document.getElementById("user-increment").textContent =
-            data.new_increment + " / 15s";
+            data.new_increment + " / ";
           document.getElementById("next-number").textContent =
             data.next_purchase;
 
@@ -346,7 +354,7 @@
         document.getElementById("user-score").textContent = data.score;
         document.getElementById(
           "user-increment"
-        ).textContent = `${data.increment} / 15s`;
+        ).textContent = `${data.increment} / `;
         lastScoreUpdate = Date.now();
       });
   }
@@ -361,7 +369,7 @@
   }
 
   updateScore();
-  setInterval(updateScore, updateInterval); // Update score once every 15s
+  setInterval(updateScore, updateInterval); // Update score once every time increment
   setInterval(updateTimer, 200); // Update the timer every 1s
 </script>
 

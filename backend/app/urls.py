@@ -13,6 +13,7 @@ urlpatterns = [
     path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
     
     path("button/purchase_button/", views.purchase_button, name="purchase_button"),
+    path("timer/purchase_time/", views.purchase_time, name="purchase_time"),
     
     path("api/predicted_score", views.get_predicted_score, name="predicted_score")
     
