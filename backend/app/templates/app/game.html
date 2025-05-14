@@ -23,11 +23,12 @@
   }
 </style>
 
+<span id="game-id" style="display: none;">{{game_id}}</span>
 <div class="d-flex flex-column justify-content-center align-items-center p-5">
   <h1 class="display-1"><span id="user-score"></span></h1>
   <h5>
-    <span id="user-increment">{{user.score.increment}} / </span>
-    <span id="time-increment">{{ user.score.time_increment }}</span>
+    <span id="user-increment">{{ score.increment }} / </span>
+    <span id="time-increment">{{ score.time_increment }}</span>
   </h5>
 
   <h2><span id="increment-countdown"></span></h2>
@@ -104,10 +105,12 @@
 </ul>
 
 <script>
+  const gameId = document.getElementById('game-id').textContent;
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   let time = document.getElementById('time-increment').textContent;
   const updateInterval = time * 1000; // users time increment in ms
   let lastScoreUpdate = Date.now();
+
 
   function playMessageAnimation(success, button, message) {
     const rect = button.getBoundingClientRect();
@@ -170,9 +173,7 @@
   })
 
   // Purchase Button: Display and show purchased buttons (increments of 1^10x)
-  document
-    .getElementById("purchase-next-button")
-    .addEventListener("click", async (e) => {
+  document.getElementById("purchase-next-button") .addEventListener("click", async (e) => {
       try {
         const response = await fetch('{% url "purchase_button" game_id %}', {
           method: "POST",
@@ -225,16 +226,14 @@
     });
 
   // Purchase quantity: Add event listeners to all the numbers and their buttons
-  document
-    .getElementById("number-list")
-    .addEventListener("click", async (e) => {
+  document.getElementById("number-list").addEventListener("click", async (e) => {
       const button = e.target.closest(".update-button");
       if (!button) return;
       
       const numberId = button.dataset.id;
       const action = button.dataset.action;
       const amount = button.dataset.amount;
-      const url = `numbers/${numberId}/${action}/${amount}/`;
+      const url = `/game/${gameId}/numbers/${numberId}/${action}/${amount}/`;
 
       try {
         const response = await fetch(url, {
@@ -264,9 +263,7 @@
 
   // Purchase Number: Purchase the next number available
   const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
-  document
-    .getElementById("purchase-next-number")
-    .addEventListener("click", async (e) => {
+  document.getElementById("purchase-next-number").addEventListener("click", async (e) => {
       try {
         const response = await fetch("{% url 'purchase_number' game_id %}", {
           method: "POST",

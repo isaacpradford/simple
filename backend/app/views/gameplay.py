@@ -41,6 +41,7 @@ def render_game(request, game_id):
         {
             "game_id": game.id,
             "form": form,
+            "score": score,
             "numbers": numbers,
             "buttons": buttons,
             "next_button": next_button,
@@ -95,7 +96,7 @@ def purchase_number(request, game_id):
 @transaction.atomic
 def increase_quantity(request, game_id, number_id, amount):
     game = get_object_or_404(Game, id=game_id, user=request.user)
-    number = get_object_or_404(Number, id=number_id, user=request.user)
+    number = get_object_or_404(Number, id=number_id, game=game_id)
     score = game.score
     
     update_score(score)
@@ -139,7 +140,7 @@ def decrease_quantity(request, game_id, number_id, amount):
     
     update_score(score)
     
-    number = get_object_or_404(Number, id=number_id, user=request.user)
+    number = get_object_or_404(Number, id=number_id, game=game_id)
     cost = (
         number.integer * amount
     )  # The cost of increasing number quantity is 1x it's size

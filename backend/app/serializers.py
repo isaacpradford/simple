@@ -30,12 +30,12 @@ class GameSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
-        fields = ["id", "user", "score_value", "increment", "time_increment", "purchased_buttons", "last_updated"]
-        extra_kwargs = {"user": {"read_only": True}}
+        fields = ["id", "game", "score_value", "increment", "time_increment", "purchased_buttons", "last_updated"]
+        extra_kwargs = {"game": {"read_only": True}}
 
 
 class NumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Number
-        fields = ["id", "integer", "quantity", "last_purchase", "user"]
-        extra_kwargs = {"user": {"read_only": True}}
+        fields = ["id", "game", "integer", "quantity", "last_purchase"]
+        extra_kwargs = {"game": {"read_only": True}}
