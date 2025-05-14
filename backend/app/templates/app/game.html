@@ -144,7 +144,7 @@
   // Purchase Time
   document.getElementById("purchase-next-second").addEventListener('click', async (e) => {
     try {
-      const response = await fetch("{% url 'purchase_time'%}", {
+      const response = await fetch("{% url 'purchase_time' game_id %}", {
         method: "POST",
         headers: {
           "X-CSRFToken": csrfToken,
@@ -174,7 +174,7 @@
     .getElementById("purchase-next-button")
     .addEventListener("click", async (e) => {
       try {
-        const response = await fetch('{% url "purchase_button" %}', {
+        const response = await fetch('{% url "purchase_button" game_id %}', {
           method: "POST",
           headers: {
             "X-CSRFToken": csrfToken,
@@ -268,7 +268,7 @@
     .getElementById("purchase-next-number")
     .addEventListener("click", async (e) => {
       try {
-        const response = await fetch("{% url 'purchase_number' %}", {
+        const response = await fetch("{% url 'purchase_number' game_id %}", {
           method: "POST",
           headers: {
             "X-CSRFToken": csrfToken,
@@ -348,7 +348,7 @@
     });
 
   function updateScore() {
-    fetch("{% url 'predicted_score' %}")
+    fetch("{% url 'predicted_score' game_id %}")
       .then((response) => response.json())
       .then((data) => {
         document.getElementById("user-score").textContent = data.score;

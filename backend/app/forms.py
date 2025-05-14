@@ -1,6 +1,7 @@
 from django import forms
+from django.shortcuts import get_object_or_404
 from decimal import Decimal
-from .models import Number
+from .models import Number, Game
 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -20,25 +21,25 @@ class UserRegistrationForm(forms.Form):
     class Meta: 
         model = User
         fields = ["username", "password"]
-        
+
 class PurchaseNumberForm(forms.Form):
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, game_id=None, **kwargs):
+        self.game = get_object_or_404(Game, id=game_id)
+        self.score = self.game.score
         super().__init__(*args, **kwargs)
-        self.user = user
         self.next_integer = self.calculate_next_integer()
         
     def calculate_next_integer(self):
-        user_numbers = self.user.numbers.all()
-        if user_numbers.exists():
-            largest_number = max(n.integer for n in user_numbers)
+        game_numbers = self.game.numbers.all()
+        if game_numbers.exists():
+            largest_number = max(n.integer for n in game_numbers)
             return largest_number * 2
         
     def clean(self):
         cleaned_data = super().clean()
-        # quantity = cleaned_data.get("quantity")
         total_cost = self.next_integer * 2
         
-        if self.user.score.score_value < total_cost:   
+        if self.score.score_value < total_cost:   
             raise forms.ValidationError("Not enough points to purchase new number.")
 
         cleaned_data["total_cost"] = total_cost
@@ -49,11 +50,4 @@ class PurchaseNumberForm(forms.Form):
         model = Number
         fields = ("integer")
         
-        
-class PurchaseButtonForm(forms.Form):
-    def __init__(self, * args, user=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
-        self.next_button = self.user.score.purchased_buttons + 1
-        
-    # def 
+    

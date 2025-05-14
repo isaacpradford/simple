@@ -11,7 +11,8 @@
       crossorigin="anonymous"
     />
     {% if user.is_authenticated %} <meta name="csrf-token" content="{{ csrf_token }}"> {% endif %}
-    <style>
+   
+   <style>
       body, html {
         height: 100%;
       }
@@ -20,13 +21,14 @@
         min-height: calc(100vh - 70px);
       }
     </style>
+
   </head>
 
   <body class="d-flex flex-column">
 
     <nav class="navbar navbar-collapse">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Simple</a>
+        <a class="navbar-brand" href="/games/">Simple</a>
 
         {% if user.is_authenticated %} <span class="align-self-end text-muted">{{ user }}</span> {% endif %} 
 

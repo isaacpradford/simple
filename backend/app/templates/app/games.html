@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Games{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+  <h1>Your Games</h1>
+  <div class="d-flex flex-column align-items-center gap-3">
+    {% for game in games %}
+    <div class="card w-50">
+      <div class="card-body">
+        <h5 class="card-title">Game {{ game.id }}</h5>
+        <p class="card-text">Started: {{ game.created_at }}</p>
+        <a href="{% url 'play_game' game.id %}" class="btn btn-primary">Continue</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'new_game' %}" class="mt-4">
+    {% csrf_token %}
+    <button class="btn btn-success">Start New Game</button>
+  </form>
+</div>
+{% endblock %}

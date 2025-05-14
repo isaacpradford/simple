@@ -1,21 +1,23 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView
-from . import views
+from .views import gameplay, authentication, games
 
 urlpatterns = [
-    path("", views.render_home, name="home"),
-    path("login/", views.login_view, name="login"),
-    path("logout/", views.logout_view, name="logout"),
-    path("register/", views.register_view, name="register"),
+    path("login/", authentication.login_view, name="login"),
+    path("logout/", authentication.logout_view, name="logout"),
+    path("register/", authentication.register_view, name="register"),
     
-    path("numbers/purchase_number/", views.purchase_number, name="purchase_number"),
-    path("numbers/<int:number_id>/increase/<int:amount>/", views.increase_quantity, name="increase_quantity"),
-    path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
-    
-    path("button/purchase_button/", views.purchase_button, name="purchase_button"),
-    path("timer/purchase_time/", views.purchase_time, name="purchase_time"),
-    
-    path("api/predicted_score", views.get_predicted_score, name="predicted_score")
+    path("games/", games.render_games_page, name="games" ),
+    path("games/new_game/", games.new_game, name="new_game"),
+    path("games/<int:game_id>/", gameplay.render_game, name="play_game"),
+
+    # path("", gameplay.render_game, name="home"),
+    path("game/<int:game_id>/numbers/purchase_number/", gameplay.purchase_number, name="purchase_number"),
+    path("game/<int:game_id>/numbers/<int:number_id>/increase/<int:amount>/", gameplay.increase_quantity, name="increase_quantity"),
+    path("game/<int:game_id>/numbers/<int:number_id>/decrease/<int:amount>/", gameplay.decrease_quantity, name="decrease_quantity"),
+    path("game/<int:game_id>/button/purchase_button/", gameplay.purchase_button, name="purchase_button"),
+    path("game/<int:game_id>/timer/purchase_time/", gameplay.purchase_time, name="purchase_time"),
+    path("game/<int:game_id>/predicted_score/", gameplay.get_predicted_score, name="predicted_score")
     
     # path("score/read/", views.ListScore.as_view(), name="read-score"),
     # path("score/update/<int:pk>/", views.UpdateScore.as_view(), name="update-score"),
