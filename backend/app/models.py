@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class Game(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="games")
     created_at = models.DateTimeField(auto_now_add=True)
+    time_elapsed = models.IntegerField(default=1)
 
 class Score(models.Model):
     game = models.OneToOneField(Game, on_delete=models.CASCADE, related_name="score")

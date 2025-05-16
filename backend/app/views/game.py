@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 
 from django.db import transaction
 from django.http import JsonResponse
@@ -39,7 +39,7 @@ def render_game(request, game_id):
         request,
         "app/game.html",
         {
-            "game_id": game.id,
+            "game": game,
             "form": form,
             "score": score,
             "numbers": numbers,
@@ -52,18 +52,18 @@ def render_game(request, game_id):
         },
     )
 
-@login_required
+@login_required(login_url="/login/")
 @require_POST
 @transaction.atomic
 def purchase_number(request, game_id):
-    game = get_object_or_404(Game, id=game_id, user=request.user)
-
+    game = get_object_or_404(Game, id=game_id)
+    score = game.score
+    
     update_score(score)
     
     user_numbers = game.numbers.all()
     next_number = max(n.integer for n in user_numbers) * 2
     cost = next_number * 2
-    score = game.score
 
     if score.score_value < cost:
         return JsonResponse(
@@ -74,19 +74,19 @@ def purchase_number(request, game_id):
         score.increment += next_number
         score.save()
 
-        number = Number.objects.create(user=request.user, integer=next_number)
+        number = Number.objects.create(game=game, integer=next_number)
         number.save()
 
         return JsonResponse(
             {
                 "success": True,
-                "message": "+" + str(next_number),
-                "new_score": str(score.score_value),
-                "new_increment": str(score.increment),
-                "new_number": str(number.integer),
+                "message": "+" + format(next_number, 'f'),
+                "new_score": format(score.score_value, 'f'),
+                "new_increment": format(score.increment, 'f'),
+                "new_number": format(number.integer, 'f'),
                 "time_increment": score.time_increment,
                 "number_id": number.id,
-                "next_purchase": str(cost),
+                "next_purchase": format(cost, 'f'),
             }
         )
 
@@ -120,11 +120,9 @@ def increase_quantity(request, game_id, number_id, amount):
             {
                 "success": True,
                 "message": "+" + str(amount),
-                "new_quantity": number.quantity,
-                "new_score": str(score.score_value),
-                "new_increment": str(
-                    score.increment
-                ),  # Return strings so that Javascript doesn't ruin big numbers
+                "new_quantity": format(number.quantity, 'f'),
+                "new_score": format(score.score_value, 'f'),
+                "new_increment": format(score.increment, 'f'),  # Return strings so that Javascript doesn't ruin big numbers
                 "time_increment": score.time_increment,
             }
         )
@@ -160,9 +158,9 @@ def decrease_quantity(request, game_id, number_id, amount):
             {
                 "success": True,
                 "message": "-" + str(amount),
-                "new_quantity": number.quantity,
-                "new_score": str(score.score_value),
-                "new_increment": str(score.increment),
+                "new_quantity": format(number.quantity, 'f'),
+                "new_score": format(score.score_value, 'f'),
+                "new_increment": format(score.increment, 'f'),
                 "time_increment": score.time_increment,
             }
         )
@@ -188,15 +186,17 @@ def purchase_button(request, game_id):
     score.score_value -= cost
     score.purchased_buttons += 1
     score.save()
+    
+    return redirect(to="/games/"+str(game_id))
 
-    return JsonResponse(
-        {
-            "success": True,
-            "new_score": str(score.score_value),
-            "new_button_amount": 10**score.purchased_buttons,
-            "message": f"Unlocked +/- {10 ** score.purchased_buttons}",
-        }
-    )
+    # return JsonResponse(
+    #     {
+    #         "success": True,
+    #         "new_score": format(score.score_value, 'f'),
+    #         "new_button_amount": format(10**score.purchased_buttons, 'f'),
+    #         "message": f"Unlocked +/- {format(10**score.purchased_buttons, 'f')}",
+    #     }
+    # )
 
 
 @login_required(login_url="/login/")
@@ -231,7 +231,7 @@ def purchase_time(request, game_id):
             {
                 "success": True,
                 "message": "-1 second",
-                "new_score": str(score.score_value),
+                "new_score": format(score.score_value, 'f'),
                 "new_timer": str(score.time_increment),
                 "new_timer_cost": str(next_timer_cost),
             }
@@ -250,17 +250,18 @@ def purchase_time(request, game_id):
 @login_required(login_url="/login/")
 def get_predicted_score(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
-
+    
     score = game.score
     update_score(score)
     
     elapsed = (timezone.now() - score.last_updated).total_seconds()
     increments = elapsed // score.time_increment
-    predicted_score = score.score_value + score.increment * Decimal(increments)
-
+    predicted_score = game.score.score_value + game.score.increment * Decimal(increments)
+    
+    print(format(predicted_score, 'f'))
     return JsonResponse(
         {
-            "score": str(predicted_score),
+            "score": format(predicted_score, 'f'),
             "increment": str(score.increment),
             "last_updated": score.last_updated.isoformat(),
             "time_increment": score.time_increment,

@@ -1,15 +1,19 @@
 from django.db import transaction
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
 from ..serializers import GameSerializer
 from ..models import Game
+from ..utils.update_score import update_score
 
 @login_required(login_url="/login/")
 @transaction.atomic
 def render_games_page(request):
-    games = request.user.games.all()
+    games = request.user.games.order_by("-id")
+
+    for game in games:
+        update_score(game.score)
 
     return render(
         request, 

@@ -1,8 +1,4 @@
-{% extends 'base.html' %}
-
-{% block title %}Games{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Games - Simple{% endblock %} {% block content %}
 <div class="container text-center">
   <h1>Your Games</h1>
   <div class="d-flex flex-column align-items-center gap-3">
@@ -10,8 +6,13 @@
     <div class="card w-50">
       <div class="card-body">
         <h5 class="card-title">Game {{ game.id }}</h5>
+
         <p class="card-text">Started: {{ game.created_at }}</p>
-        <a href="{% url 'play_game' game.id %}" class="btn btn-primary">Continue</a>
+        <p class="card-text text-break">Score: {{ game.score.score_value }}</p>
+        <p class="time-elapsed">{{ game.time_elapsed }}</p>
+        <a href="{% url 'play_game' game.id %}" class="btn btn-primary"
+          >Continue</a
+        >
       </div>
     </div>
     {% endfor %}
@@ -22,4 +23,24 @@
     <button class="btn btn-success">Start New Game</button>
   </form>
 </div>
+
+<script>
+  function formatTimer(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  const renderedGames = document.getElementsByClassName('time-elapsed');
+
+  function renderTimes() {
+    for (i = 0; i < renderedGames.length; i++) {
+      console.log(i);
+      renderedGames[i].innerHTML = formatTimer(parseInt(renderedGames[i].innerHTML))
+    }
+  }
+  
+  renderTimes();
+</script>
+
 {% endblock %}
