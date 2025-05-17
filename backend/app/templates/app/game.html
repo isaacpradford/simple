@@ -5,7 +5,7 @@
   .response-message {
     animation: floatAndFade 2s ease-out forwards;
     pointer-events: none;
-    z-index: 10;
+    z-index: 6;
     font-weight: bold;
     font-size: 1.2rem;
     transform: translate(0, 0) rotate(0);
@@ -24,16 +24,16 @@
 
   ::-webkit-scrollbar {
     width: 12px;
-}
+  }
 
   ::-webkit-scrollbar-track {
-      background-color: rgb(255, 255, 255);
-      border-radius: 10px;
+    background-color: var(--background-color);
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
-      border-radius: 10px;
-      background-color: black;
+    border-radius: 10px;
+    background-color: var(--gray-color);
   }
 </style>
 
@@ -42,57 +42,72 @@
   >{{ game.time_elapsed }}</span
 >
 
-<span id="game-timer"></span>
+<div class="pb-5 d-flex flex-column align-items-center">
+  <span class="simple-paragraph" id="game-timer"></span>
 
-<div class="d-flex flex-column justify-content-center align-items-center p-5">
-  <h1 class="display-1 text-break"><span id="user-score"></span></h1>
-  <h5>
-    <span id="user-increment">{{ score.increment }} / </span>
-    <span id="time-increment">{{ score.time_increment }}</span>
-  </h5>
+  <div class="d-flex flex-column justify-content-center align-items-center p-5">
+    <h1 class="text-break simple-header" style="font-size: 56px">
+      <span id="user-score"></span>
+    </h1>
 
-  <h2><span id="increment-countdown"></span></h2>
+    <h5 class="simple-paragraph">
+      <span id="user-increment">{{ score.increment }} / </span>
+      <span id="time-increment">{{ score.time_increment }}</span>
+    </h5>
 
-  <div style="height: 10px; width: 400px" class="position-relative" id="timer">
+    <h2><span id="increment-countdown"></span></h2>
+
     <div
-      style="border: 1px solid black; width: 400px; height: 10px"
-      class="position-absolute"
-      id="timer-outline"
-    ></div>
-    <div
-      style="height: 10px; width: 0px; transition: 0.2s linear"
-      class="bg-black position-absolute"
-      id="timer-bar"
-    ></div>
+      style="height: 10px; width: 400px"
+      class="position-relative"
+      id="timer"
+    >
+      <div
+        style="border: 1px solid var(--main-color); width: 400px; height: 10px"
+        class="position-absolute"
+        id="timer-outline"
+      ></div>
+      <div
+        style="height: 10px; width: 0px; transition: 0.2s linear; background-color: var(--main-color);"
+        class="position-absolute"
+        id="timer-bar"
+      ></div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-column justify-content-center align-items-center p-5">
+    <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
+      Next Number:
+    </h1>
+    <h2 class="simple-paragraph">
+      <span id="next-number">{{ form.next_integer }}</span>
+    </h2>
+
+    <button
+      onclick="playMessageAnimation()"
+      id="purchase-next-number"
+      class="purchase-next-number btn game-button"
+    >
+      Purchase
+    </button>
+  </div>
+
+  <div class="d-flex flex-row gap-2">
+    {% if next_button != 10000 %}
+    <button id="purchase-next-button" class="btn game-button">
+      Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+    </button>
+    {% endif %}
+
+    {% if time_increment > 5 %}
+    <button id="purchase-next-second" class="btn game-button">
+      -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
+    </button>
+    {% endif %}
   </div>
 </div>
 
-<div class="d-flex flex-column justify-content-center align-items-center p-5">
-  <h2>Next Number: <span id="next-number">{{ form.next_integer }}</span></h2>
-
-  <button
-    onclick="playMessageAnimation()"
-    id="purchase-next-number"
-    class="purchase-next-number btn btn-sm"
-  >
-    Purchase
-  </button>
-</div>
-
-<div>
-  <button id="purchase-next-button" class="btn btn-sm">
-    Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
-  </button>
-
-  <button id="purchase-next-second" class="btn btn-sm">
-    -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
-  </button>
-</div>
-
-<ul
-  id="number-list"
-  class="d-flex flex-row flex-wrap gap-2 p-0 min-vh-100 overflow-scroll overflow-x-hidden"
->
+<ul id="number-list" class="d-flex flex-row flex-wrap gap-2 p-0">
   {% for number in numbers %}
   <li
     class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25"
@@ -103,30 +118,30 @@
     </div>
 
     <div class="d-flex flex-row gap-2">
-      <div class="d-flex flex-column btn-group">
-        {% for amount in buttons %}
-        <button
-          data-action="increase"
-          data-id="{{ number.id }}"
-          data-amount="{{ amount }}"
-          class="update-button btn btn-sm"
-        >
-          +{{ amount }}
-        </button>
-        {% endfor %}
-      <!-- </div>
-
-      <div class="d-flex flex-column btn-group"> -->
-        {% for amount in buttons %}
-        <button
-          data-action="decrease"
-          data-id="{{ number.id }}"
-          data-amount="{{ amount }}"
-          class="update-button btn btn-sm"
-        >
-          -{{ amount }}
-        </button>
-        {% endfor %}
+      <div class="d-flex flex-row flex-wrap gap-2">
+        <div class="btn-group">
+          {% for amount in buttons %}
+          <button
+            data-action="increase"
+            data-id="{{ number.id }}"
+            data-amount="{{ amount }}"
+            class="update-button btn game-button"
+          >
+            +{{ amount }}
+          </button>
+          {% endfor %} 
+          
+          {% for amount in buttons %}
+          <button
+            data-action="decrease"
+            data-id="{{ number.id }}"
+            data-amount="{{ amount }}"
+            class="update-button btn game-button"
+          >
+            -{{ amount }}
+          </button>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </li>
@@ -139,6 +154,12 @@
   let time = document.getElementById("time-increment").textContent;
   let updateInterval = time * 1000; // users time increment in ms
   let lastScoreUpdate = Date.now();
+
+  let scoreInterval = null;
+  function setScoreInterval() {
+    if (scoreInterval) clearInterval(scoreInterval);
+    scoreInterval = setInterval(updateScore, updateInterval);
+  }
 
   function playMessageAnimation(success, button, message) {
     const rect = button.getBoundingClientRect();
@@ -173,52 +194,54 @@
   }
 
   // Purchase Time
-  document
-    .getElementById("purchase-next-second")
-    .addEventListener("click", async (e) => {
-      try {
-        const response = await fetch("{% url 'purchase_time' game.id %}", {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          document.getElementById("user-score").textContent = data.new_score;
-          document.getElementById("time-increment").textContent =
-            data.new_timer;
-          document.getElementById("next-second-cost").textContent =
-            data.new_timer_cost;
-          updateInterval = data.new_timer * 1000;
+  const purchaseSecond = document.getElementById('purchase-next-second');
+  
+  if (purchaseSecond) {
+    purchaseSecond.addEventListener("click", async (e) => {
+        try {
+          const response = await fetch("{% url 'purchase_time' game.id %}", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+          });
+  
+          const data = await response.json();
+  
+          if (data.success) {
+            console.log(data)
+            document.getElementById("user-score").textContent = data.new_score;
+            document.getElementById("time-increment").textContent = data.new_timer;
+            document.getElementById("next-second-cost").textContent = data.new_timer_cost;
+            updateInterval = parseInt(data.new_timer) * 1000;
+            setScoreInterval();
+            playMessageAnimation(
+              data.success,
+              document.getElementById("purchase-next-second"),
+              data.message
+            );
+          } else {
+            playMessageAnimation(
+              data.success,
+              document.getElementById("purchase-next-second"),
+              data.message
+            );
+          }
+        } catch (err) {
           playMessageAnimation(
-            data.success,
+            false,
             document.getElementById("purchase-next-second"),
-            data.message
-          );
-        } else {
-          playMessageAnimation(
-            data.success,
-            document.getElementById("purchase-next-second"),
-            data.message
+            err
           );
         }
-      } catch (err) {
-        playMessageAnimation(
-          false,
-          document.getElementById("purchase-next-second"),
-          err
-        );
-      }
-    });
-
+      });
+    }
+  
   // Purchase Button: Display and show purchased buttons (increments of 1^10x)
-  document
-    .getElementById("purchase-next-button")
-    .addEventListener("click", async (e) => {
+  const purchasebuttons = document.getElementById("purchase-next-button");
+  if (purchasebuttons) {
+    purchasebuttons.addEventListener("click", async (e) => {
       try {
         const response = await fetch('{% url "purchase_button" game.id %}', {
           method: "POST",
@@ -231,36 +254,17 @@
         const data = await response.json();
 
         if (data.success) {
-          document.getElementById("user-score").textContent = data.new_score;
-
-          const newAmount = data.new_button_amount;
-
-          const increaseBtn = document.createElement("button");
-          increaseBtn.className = "update-button btn btn-sm";
-          increaseBtn.textContent = `+${newAmount}`;
-          increaseBtn.dataset.action = "increase";
-          increaseBtn.dataset.id = data.number_id;
-          increaseBtn.dataset.amount = newAmount;
-
-          const decreaseBtn = document.createElement("button");
-          decreaseBtn.className = "update-button btn btn-sm";
-          decreaseBtn.textContent = `-${newAmount}`;
-          decreaseBtn.dataset.action = "decrease";
-          decreaseBtn.dataset.id = data.number_id;
-          decreaseBtn.dataset.amount = newAmount;
-
-          const groups = li.querySelectorAll(".btn-group");
-          if (groups.length >= 2) {
-            groups[0].appendChild(increaseBtn);
-            groups[1].appendChild(decreaseBtn);
-          }
-
           playMessageAnimation(
             true,
             document.getElementById("purchase-next-button"),
             data.message
           );
         } else {
+          if (data.message === "No more buttons!") {
+            document.getElementById("purchase-next-button").style.display =
+              "none";
+          }
+
           playMessageAnimation(
             false,
             document.getElementById("purchase-next-button"),
@@ -269,6 +273,7 @@
         }
       } catch (err) {}
     });
+  }
 
   // Purchase quantity: Add event listeners to all the numbers and their buttons
   document
@@ -340,7 +345,7 @@
               data-action="increase"
               data-id="${data.number_id}"
               data-amount="${amount}"
-              class="update-button btn btn-sm"
+              class="update-button btn game-button"
             >
               +${amount}
             </button>
@@ -355,7 +360,7 @@
               data-action="decrease"
               data-id="${data.number_id}"
               data-amount="${amount}"
-              class="update-button btn btn-sm"
+              class="update-button btn game-button"
             >
               -${amount}
             </button>
@@ -366,15 +371,16 @@
           const newHTML = `
           <li class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25">
             <div class="d-flex flex-column justify-content-center align-items-center">
-              <h5>${data.new_number}</h5>
-              <p>1</p>
+              <h5 class="text-break">${data.new_number}</h5>
+              <p class="text-break">1</p>
             </div>
+            
             <div class="d-flex flex-row gap-2">
-              <div class="d-flex flex-row btn-group">
-                ${increaseButtons}
-              </div>
-              <div class="d-flex flex-row btn-group">
-                ${decreaseButtons}
+              <div class="d-flex flex-row flex-wrap">
+                <div class="btn-group">
+                  ${increaseButtons}
+                  ${decreaseButtons}
+                </div>
               </div>
             </div>
           </li>
@@ -401,6 +407,11 @@
           "user-increment"
         ).textContent = `${data.increment} / `;
         lastScoreUpdate = Date.now();
+        playMessageAnimation(
+          true,
+          document.getElementById("user-score"),
+          "+" + data.increment
+        );
       });
   }
 
@@ -430,9 +441,10 @@
     document.getElementById("timer-bar").style.width = `${width}%`;
   }
 
+
   updateScore();
   updateTimer();
-  setInterval(updateScore, updateInterval); // Update score once every time increment
+  setScoreInterval(); // Update score once every time increment
   setInterval(updateTimerAnimation, 200); // Update the timer animation every .2s
   setInterval(updateTimer, 1000); // Update timer every second
 </script>

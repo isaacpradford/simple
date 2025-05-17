@@ -10,7 +10,7 @@ from ..utils.update_score import update_score
 @login_required(login_url="/login/")
 @transaction.atomic
 def render_games_page(request):
-    games = request.user.games.order_by("-id")
+    games = request.user.games.order_by("id")
 
     for game in games:
         update_score(game.score)
@@ -32,4 +32,13 @@ def new_game(request):
         game = serializer.save()
         return redirect("play_game", game.id)
     
-    return redirect("render_games_page")
+    return redirect("/games/")
+
+
+@login_required(login_url="/login/")
+@require_POST
+def delete_game(request, game_id):
+    obj = Game.objects.get(id=game_id)
+    obj.delete()
+    
+    return redirect("/games/")

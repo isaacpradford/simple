@@ -33,7 +33,8 @@ def render_game(request, game_id):
     next_button_cost = next_button * 10
     time_increment = score.time_increment
     next_second_cost = calculate_time_cost(time_increment)
-
+    
+    print(next_button)
 
     return render(
         request,
@@ -173,10 +174,12 @@ def decrease_quantity(request, game_id, number_id, amount):
 def purchase_button(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
     score = game.score
-    
     update_score(score)
     
     current_buttons = score.purchased_buttons
+    
+    if current_buttons >= 4:
+         return JsonResponse({"success": False, "message": "No more buttons!"})
 
     cost = Decimal(10) ** (current_buttons + 1)
     
@@ -210,8 +213,6 @@ def purchase_time(request, game_id):
     current_timer = score.time_increment
     cost = calculate_time_cost(current_timer)
     next_timer_cost = calculate_time_cost(current_timer - 1)
-
-    print(cost)
 
     if current_timer == 5:
         return JsonResponse(

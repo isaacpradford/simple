@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="root">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Simple{% endblock %}</title>
+    <!-- Font Imports -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Moirai+One&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap import -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -15,21 +24,133 @@
     {% endif %}
 
     <style>
+      :root {
+        --background-color: #fdfdff;
+        --gray-color: #d6d6d6;
+        --main-color: #051be8;
+        --highlight-color: #3a4dfe;
+        --button-color: #041183;
+        --game-button-color: #5667ff;
+
+        --font-color: #000;
+        --main-font: "Moirai One", system-ui;
+        --article-font: "Montserrat", sans-serif;
+        --invert: invert(0);
+      }
+
+      .dark-mode {
+        --background-color: #1d1c1c;
+        --font-color: #f5f5f5;
+        --gray-color: #333;
+        --main-color: #8ab4f8;
+        --highlight-color: #4c8bf5;
+        --button-color: #1a73e8;
+        --game-button-color: #5c6bc0;
+        --invert: invert(1);
+      }
+
       body,
       html {
+        background-color: var(--background-color);
+        color: var(--font-color);
         height: 100%;
       }
+
+      body {
+        display: grid;
+        grid-template-columns: 100vw;
+        grid-template-rows: 70px calc(100vh - 70px);
+      }
+
+      nav {
+        grid-row: 1;
+      }
+      .offcanvas {
+        background-color: var(--background-color);
+        color: var(--font-color);
+      }
+
+      .invert {
+        filter: var(--invert);
+      }
+
+      .nav-link {
+        color: var(--font-color);
+        font-size: 28px;
+        font-weight: 200;
+      }
+
       main {
-        z-index: 0;
+        z-index: 5;
         min-height: calc(100vh - 70px);
+        grid-row: 2;
+      }
+
+      .simple-logo {
+        color: var(--main-color);
+        font-size: 32px;
+        font-family: var(--main-font);
+        font-weight: 400;
+        padding: 5px;
+        font-style: normal;
+        transition: 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .simple-logo:hover {
+        color: var(--background-color);
+        background-color: var(--main-color);
+        border-radius: 5px;
+      }
+
+      .simple-title {
+        font-family: var(--main-font);
+        color: var(--highlight-color);
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+      }
+      
+      .simple-header {
+        font-family: var(--article-font);
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      .simple-paragraph {
+        font-family: var(--article-font);
+        font-optical-sizing: auto;
+        font-weight: 200;
+        font-style: normal;
+      }
+
+      .simple-button {
+        color: var(--background-color);
+        background-color: var(--highlight-color);
+      }
+
+      .game-button {
+        color: var(--background-color);
+        background-color: var(--highlight-color);
+      }
+      .game-button:hover {
+        color: var(--background-color);
+        background-color: var(--game-button-color);
+      }
+
+      .simple-button:hover {
+        color: var(--background-color);
+        background-color: var(--button-color);
       }
     </style>
   </head>
 
-  <body class="d-flex flex-column">
-    <nav class="navbar navbar-collapse bg-body-tertiary fixed-top">
+  <body>
+    <nav class="navbar navbar-collapse fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/games/">Simple</a>
+        <a class="navbar-brand simple-logo" href="/games/">(SIMPLE)</a>
+        {% if user.is_authenticated %}
         <button
           class="navbar-toggler"
           type="button"
@@ -38,7 +159,7 @@
           aria-controls="offcanvasNavbar"
           aria-label="Toggle navigation"
         >
-          <span class="navbar-toggler-icon"></span>
+          <span class="navbar-toggler-icon invert"></span>
         </button>
 
         <div
@@ -48,12 +169,15 @@
           aria-labelledby="offcanvasNavbarLabel"
         >
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title display-5" id="offcanvasNavbarLabel">
-              Simple
+            <h5
+              class="offcanvas-title simple-logo display-5"
+              id="offcanvasNavbarLabel"
+            >
+              (SIMPLE)
             </h5>
             <button
               type="button"
-              class="btn-close"
+              class="btn-close invert"
               data-bs-dismiss="offcanvas"
               aria-label="Close"
             ></button>
@@ -61,73 +185,43 @@
 
           <div class="offcanvas-body">
             <ul
-              class="navbar-nav justify-content-end align-items-end flex-grow-1 pe-3"
+              class="navbar-nav justify-content-end align-items-end flex-grow-1"
             >
-              <li class="nav-item display-6">
+              <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="/games/"
                   >Your Games</a
                 >
               </li>
 
-              <li class="nav-item display-6">
+              <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="/leaderboard/"
                   >Leaderboard</a
                 >
               </li>
 
-              <li class="nav-item display-6">
+              <li class="nav-item">
                 <a class="nav-link" href="/settings/">Settings</a>
+              </li>
+
+              <li class="nav-item text-danger">
+                <a class="nav-link text-danger" href="/logout/">Logout</a>
               </li>
 
               <form method="post" action="{% url 'new_game' %}" class="mt-4">
                 {% csrf_token %}
-                <button class="btn btn-success">Start New Game</button>
+                <button class="btn simple-button">Start New Game</button>
               </form>
             </ul>
           </div>
         </div>
+        {% else %}
+        <div>
+          <a class="navbar-brand" href="/login/">Log In</a>
+          <a class="navbar-brand" href="/leaderboard/">Leaderboard</a>
+        </div>
+        {% endif %}
       </div>
     </nav>
-
-    <!-- <nav class="navbar navbar-collapse">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/games/">Simple</a>
-
-        {% if user.is_authenticated %}
-        <span class="text-muted">{{ user }}</span> {% endif %}
-
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarText"
-          aria-controls="navbarText"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarText">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="/games">Your Games</a>
-              <a class="nav-link" href="/settings">Settings</a>
-            </li>
-            <li class="d-flex align-items-center gap-3">
-              <form method="post" action="{% url 'logout' %}" class="mb-0">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm">
-                  Logout
-                </button>
-              </form>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-    </nav> -->
 
     <main class="container d-flex flex-column align-items-center">
       {% block content %}{% endblock %}
@@ -140,3 +234,15 @@
     ></script>
   </body>
 </html>
+
+<script>
+  const mode = localStorage.getItem('dark-mode');
+
+  if (mode) {
+    if (localStorage.getItem("dark-mode") === "enabled") {
+      document.getElementById('root').classList.add("dark-mode");
+  } else if (localStorage.getItem("dark-mode") === "disabled") {
+      document.getElementById('root').classList.remove("dark-mode");
+    }
+  }
+</script>

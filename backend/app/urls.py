@@ -10,9 +10,11 @@ urlpatterns = [
     path("register/", authentication.register_view, name="register"),
     
     path("settings/", settings.render_settings, name="settings"),
+    path("settings/deactivate_account/", settings.deactivate_account, name="deactivate_account"),
     
     path("games/", games.render_games_page, name="games" ),
     path("games/new_game/", games.new_game, name="new_game"),
+    path("games/delete_game/<int:game_id>/", games.delete_game, name="delete_game"),
     path("games/<int:game_id>/", game.render_game, name="play_game"),
 
     path("game/<int:game_id>/numbers/purchase_number/", game.purchase_number, name="purchase_number"),

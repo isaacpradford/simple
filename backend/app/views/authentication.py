@@ -55,6 +55,8 @@ def register_view(request):
                 user = serializer.save()
                 login(request, user)  # auto-login after registration
                 return redirect("/games/")
+            else:
+                form.add_error(None, "Username already in use.")
     else:
         form = UserRegistrationForm()
 
