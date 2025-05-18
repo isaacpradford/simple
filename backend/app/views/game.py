@@ -33,8 +33,6 @@ def render_game(request, game_id):
     next_button_cost = next_button * 10
     time_increment = score.time_increment
     next_second_cost = calculate_time_cost(time_increment)
-    
-    print(next_button)
 
     return render(
         request,
@@ -52,6 +50,23 @@ def render_game(request, game_id):
             "last_updated": score.last_updated,
         },
     )
+
+@login_required(login_url="/login/")
+@require_POST
+@transaction.atomic
+def click_main_button(request, game_id):
+    score = get_object_or_404(Score, game=game_id)
+    update_score(score)
+    
+    new_score = score.score_value + score.increment
+    score.score_value = new_score
+    score.save()
+    
+    return JsonResponse({
+        "new_score": format(new_score, 'f'),
+        "success": True,
+        "message": "+" + format(score.increment, 'f')
+    })
 
 @login_required(login_url="/login/")
 @require_POST
@@ -259,7 +274,6 @@ def get_predicted_score(request, game_id):
     increments = elapsed // score.time_increment
     predicted_score = game.score.score_value + game.score.increment * Decimal(increments)
     
-    print(format(predicted_score, 'f'))
     return JsonResponse(
         {
             "score": format(predicted_score, 'f'),

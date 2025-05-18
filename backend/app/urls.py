@@ -17,6 +17,7 @@ urlpatterns = [
     path("games/delete_game/<int:game_id>/", games.delete_game, name="delete_game"),
     path("games/<int:game_id>/", game.render_game, name="play_game"),
 
+    path("game/<int:game_id>/button_click/", game.click_main_button, name="button_click"),
     path("game/<int:game_id>/numbers/purchase_number/", game.purchase_number, name="purchase_number"),
     path("game/<int:game_id>/numbers/<int:number_id>/increase/<int:amount>/", game.increase_quantity, name="increase_quantity"),
     path("game/<int:game_id>/numbers/<int:number_id>/decrease/<int:amount>/", game.decrease_quantity, name="decrease_quantity"),
