@@ -263,6 +263,8 @@ def purchase_button(request, game_id):
     score.score_value -= cost
     score.purchased_buttons += 1
     score.save()
+    
+    formatted_val = "{:,}".format(10**(score.purchased_buttons - 1))
 
     # return redirect(to="/games/" + str(game_id))
 
@@ -271,7 +273,7 @@ def purchase_button(request, game_id):
             "success": True,
             "new_score": "{:,}".format(int(score.score_value)),
             "new_button_amount": "{:,}".format(10**score.purchased_buttons),
-            "message": f"Unlocked +/- {"{:,}".format(10**(score.purchased_buttons - 1))}",
+            "message": f"Unlocked +/- {formatted_val}",
         }
     )
 
