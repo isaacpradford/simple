@@ -1,13 +1,101 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
 
-{% block content %}
+<style>
+  .login-parent {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    padding: 50px;
+    gap: 5vw;
 
-<h2>Register</h2>
-<form method="post">
+    box-shadow: 10px 10px 0px var(--main-color);
+
+    margin: auto;
+    min-width: 200px;
+    min-height: 300px;
+  }
+
+  .login-title {
+    width: 50%;
+    color: var(--main-color);
+    border-right: 1px solid var(--main-color);
+  }
+
+  .login-title h2 {
+    font-size: 32px;
+    font-family: var(--main-font);
+    font-weight: 400;
+    padding: 5px;
+    font-style: normal;
+    transition: 0.2s ease-in-out;
+  }
+
+  .login-title p {
+    font-family: var(--article-font);
+    font-size: 24px;
+    font-weight: 300;
+    max-width: 70%;
+  }
+
+  .login-form {
+    width: 50%;
+  }
+
+  .login-form input {
+    width: 100%;
+  }
+
+  .form-label {
+    font-family: var(--article-font);
+    font-size: 14px;
+    color: gray;
+  }
+
+  @media only screen and (max-width: 600px) {
+    .login-parent {
+      flex-direction: column;
+    }
+    .login-title {
+      width: 100%;
+    }
+
+    .login-form {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="login-parent">
+  <div class="login-title">
+    <h2>SIMPLE</h2>
+    <p>An idle game about simple math</p>
+  </div>
+
+  <form class="login-form" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
 
-<p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    <h2>Register</h2>
+    <div class="mb-3">
+      <label for="usernameInput" class="form-label">Username</label>
+      {{ form.username }}
+    </div>
+
+    <div class="mb-3">
+      <label for="passwordInput" class="form-label">Password</label>
+      {{ form.password }}
+    </div>
+
+    <button class="btn simple-button" type="submit">Register</button>
+
+    {% if form.errors %} {% for error in form.non_field_errors %}
+    <li class="alert text-danger">{{ error }}</li>
+    {% endfor %} {% endif %}
+  </form>
+</div>
+
+<p class="simple-header">
+  Already have an account? <a href="{% url 'login' %}">Login here</a>
+</p>
 {% endblock %}

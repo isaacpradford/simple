@@ -1,0 +1,68 @@
+{% extends 'base.html' %} {% block title %}Games - Simple{% endblock %} 
+{% block content %}
+<style>
+  .simple-card {
+    background-color: var(--background-color);
+    padding: 10px;
+    border: 1px solid rgb(219, 219, 219);
+    border-radius: 20px;
+  }
+</style>
+
+<div class="container text-center">
+  <h1 class="simple-header">Your Games</h1>
+  <div class="d-flex flex-row flex-wrap m-auto justify-content-center gap-3">
+    {% for game in games %}
+    <div style="width: 350px;" class="simple-card h-50">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <h5 class="card-title simple-header">Game {{ forloop.counter }}</h5>
+        <!-- <p class="card-text">Started: {{ game.created_at }}</p> -->
+        <p class="card-text text-truncate simple-paragraph w-75">{{ game.score.score_value }}</p>
+        <span class="d-flex flex-row">Time: <p class="time-elapsed simple-paragraph">{{ game.time_elapsed }}</p></span>
+        <div class="d-flex flex-row justify-content-center align-items-center gap-2">
+          <a href="{% url 'play_game' game.id %}" class="btn simple-button simple-header"
+            >Continue</a>
+          <form
+            method="post"
+            action="{% url 'delete_game' game.id %}"
+          >
+            {% csrf_token %}
+            <button class="btn btn-danger simple-header">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'new_game' %}" class="mt-4">
+    {% csrf_token %}
+    <button class="btn btn-success">Start New Game</button>
+  </form>
+</div>
+
+<script>
+  function formatTimer(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  }
+
+  const renderedGames = document.getElementsByClassName("time-elapsed");
+
+  function renderTimes() {
+    for (i = 0; i < renderedGames.length; i++) {
+      console.log(i);
+      renderedGames[i].innerHTML = formatTimer(
+        parseInt(renderedGames[i].innerHTML)
+      );
+    }
+  }
+
+  renderTimes();
+</script>
+
+{% endblock %}

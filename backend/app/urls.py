@@ -1,27 +1,30 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView
-from . import views
+from .views import landing, authentication, game, games, settings, leaderboard
 
 urlpatterns = [
-    path("", views.render_home, name="home"),
-    path("login/", views.login_view, name="login"),
-    path("logout/", views.logout_view, name="logout"),
-    path("register/", views.register_view, name="register"),
+    path("", landing.render_landing_page, name="landing"),
     
-    path("numbers/purchase_number/", views.purchase_number, name="purchase_number"),
-    path("numbers/<int:number_id>/increase/<int:amount>/", views.increase_quantity, name="increase_quantity"),
-    path("numbers/<int:number_id>/decrease/<int:amount>/", views.decrease_quantity, name="decrease_quantity"),
+    path("login/", authentication.login_view, name="login"),
+    path("logout/", authentication.logout_view, name="logout"),
+    path("register/", authentication.register_view, name="register"),
     
-    path("button/purchase_button/", views.purchase_button, name="purchase_button"),
-    path("timer/purchase_time/", views.purchase_time, name="purchase_time"),
+    path("settings/", settings.render_settings, name="settings"),
+    path("settings/deactivate_account/", settings.deactivate_account, name="deactivate_account"),
     
-    path("api/predicted_score", views.get_predicted_score, name="predicted_score")
+    path("games/", games.render_games_page, name="games" ),
+    path("games/new_game/", games.new_game, name="new_game"),
+    path("games/delete_game/<int:game_id>/", games.delete_game, name="delete_game"),
+    path("games/<int:game_id>/", game.render_game, name="play_game"),
+
+    path("game/<int:game_id>/button_click/", game.click_main_button, name="button_click"),
+    path("game/<int:game_id>/numbers/purchase_number/", game.purchase_number, name="purchase_number"),
+    path("game/<int:game_id>/numbers/<int:number_id>/increase/<int:amount>/", game.increase_quantity, name="increase_quantity"),
+    path("game/<int:game_id>/numbers/<int:number_id>/decrease/<int:amount>/", game.decrease_quantity, name="decrease_quantity"),
     
-    # path("score/read/", views.ListScore.as_view(), name="read-score"),
-    # path("score/update/<int:pk>/", views.UpdateScore.as_view(), name="update-score"),
+    path("game/<int:game_id>/button/purchase_button/", game.purchase_button, name="purchase_button"),
+    path("game/<int:game_id>/timer/purchase_time/", game.purchase_time, name="purchase_time"),
+    path("game/<int:game_id>/predicted_score/", game.get_predicted_score, name="predicted_score"),
     
-    # path("number/read/", views.ListNumbers.as_view(), name="read-numbers"),
-    # path("number/create/", views.CreateNumber.as_view(), name="create-number"),
-    # path("number/update/<int:pk>/", views.UpdateNumber.as_view(), name="update-number"),
-    # path("number/delete/<int:pk>/", views.DeleteNumber.as_view(), name="delete-number")
+    path("leaderboard/", leaderboard.render_leaderboard, name="leaderboard")
 ]

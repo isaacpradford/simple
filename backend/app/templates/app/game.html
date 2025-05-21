@@ -1,0 +1,551 @@
+{% extends 'base.html' %} {% block title %}Game - Simple{% endblock %} {% block content %}
+
+<style>
+  .response-message {
+    animation: floatAndFade 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 6;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transform: translate(0, 0) rotate(0);
+  }
+
+  @keyframes floatAndFade {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rotation));
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--background-color);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: var(--gray-color);
+  }
+
+  .tooltip {
+    position: absolute;
+    background-color: var(--font-color);
+    color: var(--background-color);
+    
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    max-width: 300px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+  }
+
+  .tooltip::after {
+    font-size: 10px;
+
+    content: " Tooltips can be disabled in your settings.";
+  }
+
+  .tooltip.show {
+    opacity: 1;
+  }
+</style>
+
+<span id="game-id" style="display: none">{{ game.id }}</span>
+<span id="game-timer-hidden" style="display: none"
+  >{{ game.time_elapsed }}</span
+>
+
+<div class="pb-5 d-flex flex-column align-items-center">
+  <span class="simple-paragraph" id="game-timer"></span>
+
+  <div class="d-flex flex-column justify-content-center align-items-center p-5">
+    <h1 class="text-break simple-header" style="font-size: 56px">
+      <span class="tooltip-trigger"  data-tooltip="This number is your Score, which can be used to buy new numbers, buttons, or time." id="user-score"></span>
+    </h1>
+
+    <h5 class="simple-paragraph">
+      <div class="d-flex flex-row gap-1 tooltip-trigger" data-tooltip="This number is your Increment, which is the sum total of all of your purchased numbers.">
+        <span id="user-increment">{{ score.increment }} / </span>
+        <span id="time-increment">{{ score.time_increment }}</span>
+        <p>seconds</p>
+      </div>
+    </h5>
+
+    <h2><span id="increment-countdown"></span></h2>
+
+    <div style="height: 10px; width: 40vw" class="position-relative" id="timer">
+      <div
+        style="border: 1px solid var(--main-color); width: 40vw; height: 10px"
+        class="position-absolute"
+        id="timer-outline"
+      ></div>
+      <div
+        style="
+          height: 10px;
+          width: 0px;
+          transition: 0.2s linear;
+          background-color: var(--main-color);
+        "
+        class="position-absolute"
+        id="timer-bar"
+      ></div>
+    </div>
+  </div>
+
+  <div>
+    <button id="main-button">Click Me</button>
+  </div>
+
+  <div class="d-flex flex-column justify-content-center align-items-center p-5">
+    <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
+      Next Number:
+    </h1> -->
+    <h2 class="simple-paragraph d-flex flex-column align-items-center" >
+      <span id="next_number">+{{ form.next_integer }}</span>
+      <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
+        >Costs: {{ form.next_integer_cost }}</span
+      >
+    </h2>
+
+    <button
+      id="purchase-next-number"
+      class="purchase-next-number btn game-button tooltip-trigger"
+      data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+    >
+      Purchase
+    </button>
+  </div>
+
+  <div class="d-flex flex-row gap-2">
+    {% if next_button != 1000 %}
+    <button id="purchase-next-button" class="btn game-button tooltip-trigger" data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster.">
+      Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+    </button>
+    {% endif %} {% if time_increment > 5 %}
+    <button id="purchase-next-second" class="btn game-button tooltip-trigger" data-tooltip="Subtract a second from your timer.">
+      -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<ul id="number-list" class="d-flex flex-row flex-wrap gap-2 p-0">
+  {% for number in numbers %}
+  <li
+    class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25"
+  >
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h5 class="text-break">{{ number.integer}}</h5>
+      <p class="text-break">{{ number.quantity }}</p>
+    </div>
+
+    <div class="d-flex flex-row gap-2">
+      <div class="d-flex flex-row flex-wrap gap-2">
+        <div class="d-flex flex-row flex-wrap">
+          <div class="btn-group tooltip-trigger"
+          data-tooltip="Increase/Decrease the quantity of this number. Costs 10x the number size!">
+            {% for amount in buttons %}
+            <button
+              data-action="increase"
+              data-id="{{ number.id }}"
+              data-amount="{{ amount }}"
+              class="update-button btn game-button"
+            >
+              +{{ amount }}
+            </button>
+            {% endfor %} {% for amount in buttons %}
+            <button
+              data-action="decrease"
+              data-id="{{ number.id }}"
+              data-amount="{{ amount }}"
+              class="update-button btn game-button"
+            >
+              -{{ amount }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+
+
+<script>
+  const gameId = document.getElementById("game-id").textContent;
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  let time = document.getElementById("time-increment").textContent;
+  let updateInterval = time * 1000; // users time increment in ms
+  let lastScoreUpdate = Date.now();
+
+  let scoreInterval = null;
+  function setScoreInterval() {
+    if (scoreInterval) clearInterval(scoreInterval);
+    scoreInterval = setInterval(updateScore, updateInterval);
+  }
+
+  function playMessageAnimation(success, button, message) {
+    const rect = button.getBoundingClientRect();
+    const msg = document.createElement("div");
+    msg.classList.add("response-message");
+    msg.textContent = message;
+
+    // Position relative to the button
+    msg.style.left = `${rect.left + rect.width / 2}px`;
+    msg.style.top = `${rect.top - 10}px`;
+    msg.style.position = "fixed";
+
+    msg.style.color = success ? "#46d467" : "#ff5656";
+
+    const angle = 45 + Math.random() * 90; // Random angle from 45-135
+    const distance = -100; // Pixels
+    const angleRad = (angle * Math.PI) / 180;
+    const dx = Math.cos(angleRad) * distance;
+    const dy = Math.sin(angleRad) * distance;
+
+    const rotation = Math.random() * 60 - 30;
+
+    msg.style.setProperty("--dx", `${dx}px`);
+    msg.style.setProperty("--dy", `${dy}px`);
+    msg.style.setProperty("--rotation", `${rotation}deg`);
+
+    document.body.appendChild(msg);
+
+    setTimeout(() => {
+      msg.remove();
+    }, 2000);
+  }
+
+  const clickButton = document.getElementById("main-button");
+  if (clickButton) {
+    clickButton.addEventListener("click", async () => {
+      try {
+        const response = await fetch('{% url "button_click" game.id %}', {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById("user-score").textContent = data.new_score;
+          playMessageAnimation(
+            data.success,
+            document.getElementById("user-score"),
+            data.message
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  }
+
+  // if (clickButton)
+  // Purchase Time
+  const purchaseSecond = document.getElementById("purchase-next-second");
+  if (purchaseSecond) {
+    purchaseSecond.addEventListener("click", async (e) => {
+      try {
+        const response = await fetch("{% url 'purchase_time' game.id %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById("user-score").textContent = data.new_score;
+          document.getElementById("time-increment").textContent =
+            data.new_timer + " seconds";
+          document.getElementById("next-second-cost").textContent =
+            data.new_timer_cost;
+          updateInterval = parseInt(data.new_timer) * 1000;
+          setScoreInterval();
+          playMessageAnimation(
+            data.success,
+            document.getElementById("purchase-next-second"),
+            data.message
+          );
+        } else {
+          playMessageAnimation(
+            data.success,
+            document.getElementById("purchase-next-second"),
+            data.message
+          );
+        }
+      } catch (err) {
+        playMessageAnimation(
+          false,
+          document.getElementById("purchase-next-second"),
+          err
+        );
+      }
+    });
+  }
+
+  // Purchase Button: Display and show purchased buttons (increments of 1^10x)
+  const purchasebuttons = document.getElementById("purchase-next-button");
+  if (purchasebuttons) {
+    purchasebuttons.addEventListener("click", async (e) => {
+      try {
+        const response = await fetch('{% url "purchase_button" game.id %}', {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          location.reload();
+          playMessageAnimation(
+            true,
+            document.getElementById("purchase-next-button"),
+            data.message
+          );
+        } else {
+          if (data.message === "No more buttons!") {
+            document.getElementById("purchase-next-button").style.display =
+              "none";
+          }
+
+          playMessageAnimation(
+            false,
+            document.getElementById("purchase-next-button"),
+            data.message
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  // Purchase quantity: Add event listeners to all the numbers and their buttons
+  document
+    .getElementById("number-list")
+    .addEventListener("click", async (e) => {
+      const button = e.target.closest(".update-button");
+      if (!button) return;
+
+      const numberId = button.dataset.id;
+      const action = button.dataset.action;
+      const amount = button.dataset.amount;
+      const url = `/game/${gameId}/numbers/${numberId}/${action}/${amount}/`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById("user-score").textContent = data.new_score;
+          document.getElementById("user-increment").textContent =
+            data.new_increment + " /";
+          button.closest("li").querySelector("p").textContent =
+            data.new_quantity;
+          playMessageAnimation(data.success, e.target, data.message);
+        } else {
+          playMessageAnimation(data.success, e.target, data.message);
+        }
+      } catch (err) {
+        console.error("Error", err);
+      }
+    });
+
+  // Purchase Number: Purchase the next number available
+  const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
+  document
+    .getElementById("purchase-next-number")
+    .addEventListener("click", async (e) => {
+      try {
+        const response = await fetch("{% url 'purchase_number' game.id %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          playMessageAnimation(data.success, e.target, data.message);
+          if (data.new_score === "Infinity") return;
+
+          document.getElementById("user-score").textContent = data.new_score;
+          document.getElementById("user-increment").textContent =
+            data.new_increment + " / ";
+          document.getElementById("next_number").textContent =
+            "+" + data.next_number;
+          document.getElementById("next_number_cost").textContent =
+            "Costs: " + data.next_number_cost;
+
+          // Dynamic +/- buttons
+          const increaseButtons = buttonAmounts
+            .map(
+              (amount) => `
+            <button
+              data-action="increase"
+              data-id="${data.number_id}"
+              data-amount="${amount}"
+              class="update-button btn game-button"
+            >
+              +${amount}
+            </button>
+          `
+            )
+            .join("");
+
+          const decreaseButtons = buttonAmounts
+            .map(
+              (amount) => `
+            <button
+              data-action="decrease"
+              data-id="${data.number_id}"
+              data-amount="${amount}"
+              class="update-button btn game-button"
+            >
+              -${amount}
+            </button>
+          `
+            )
+            .join("");
+
+          const newHTML = `
+          <li class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25">
+            <div class="d-flex flex-column justify-content-center align-items-center">
+              <h5 class="text-break">${data.new_number}</h5>
+              <p class="text-break">1</p>
+            </div>
+            
+            <div class="d-flex flex-row gap-2">
+              <div class="d-flex flex-row flex-wrap">
+                <div class="btn-group tooltip-trigger">
+                  ${increaseButtons}
+                  ${decreaseButtons}
+                </div>
+              </div>
+            </div>
+          </li>
+        `;
+
+          document
+            .getElementById("number-list")
+            .insertAdjacentHTML("afterbegin", newHTML);
+        } else {
+          playMessageAnimation(data.success, e.target, data.message);
+        }
+      } catch (error) {
+        console.error(error);
+        playMessageAnimation(false, e.target, "Something went wrong.");
+      }
+    });
+
+
+  // Load the tooltips unless tooltips is false (set in settings)
+  document.addEventListener("DOMContentLoaded", () => {
+    const tooltipEnabled = localStorage.getItem("tooltips") == "true";
+    if (!tooltipEnabled) return;
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
+    document.body.appendChild(tooltip);
+
+    document.querySelectorAll("[data-tooltip]").forEach((el) => {
+      el.addEventListener("mouseenter", (e) => {
+        const message = el.getAttribute("data-tooltip");
+        tooltip.textContent = message;
+        tooltip.classList.add("show");
+      });
+
+      el.addEventListener("mousemove", (e) => {
+        tooltip.style.left = e.pageX + 10 + "px";
+        tooltip.style.top = e.pageY + 10 + "px";
+      });
+
+      el.addEventListener("mouseleave", () => {
+        tooltip.classList.remove("show");
+      });
+    });
+  });
+
+  function updateScore() {
+    fetch("{% url 'predicted_score' game.id %}")
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("user-score").textContent = data.score;
+        document.getElementById(
+          "user-increment"
+        ).textContent = `${data.increment} / `;
+        lastScoreUpdate = Date.now();
+        playMessageAnimation(
+          true,
+          document.getElementById("user-score"),
+          "+" + data.increment
+        );
+      });
+  }
+
+  function formatTimer(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  }
+
+  function updateTimer() {
+    let timerElement = document.getElementById("game-timer-hidden");
+    let timer = parseInt(timerElement.textContent);
+    timer += 1;
+    timerElement.textContent = timer;
+    document.getElementById("game-timer").textContent = formatTimer(timer);
+  }
+
+  function updateTimerAnimation() {
+    const now = Date.now();
+    const elapsed = now - lastScoreUpdate;
+    const progress = (elapsed % updateInterval) / updateInterval;
+    const width = progress * 100;
+
+    document.getElementById("timer-bar").style.width = `${width}%`;
+  }
+
+  updateScore();
+  updateTimer();
+  setScoreInterval(); // Update score once every time increment
+  setInterval(updateTimerAnimation, 200); // Update the timer animation every .2s
+  setInterval(updateTimer, 1000); // Update timer every second
+</script>
+
+{% endblock %}
