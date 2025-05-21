@@ -24,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-&i&-soe5%ut84zg2ct-%fcq*_2)g&-=rtibab&jlqz50tp!7$a"
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '') == 'False'
 
-ALLOWED_HOSTS = ["*"]
+
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Specify configs for JWTs
 REST_FRAMEWORK = {
@@ -102,7 +103,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME"),
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        # "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
     }
 }
@@ -130,11 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -152,3 +150,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Allow CORS origins, make this more secure later
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# Enable secure cookies
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_SSL_REDIRECT = True
