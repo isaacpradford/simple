@@ -1,7 +1,66 @@
-{% extends 'base.html' %} {% block title %}Simple - An Idle Game{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block title %}Simple - An Idle Game{% endblock %}
+{% block content %}
 
-<div>
-    
+<style>
+  .landing-page {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .landing-header {
+    font-size: 125px;
+  }
+
+  .landing-subtitle {
+    font-family: var(--article-font);
+    font-weight: 200;
+    font-size: 24px;
+  }
+
+  .landing-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5vh;
+  }
+
+  .section-one {
+    margin-top: -20vh;
+  }
+
+  @media only screen and (max-width: 600px) {
+        .landing-header {
+            font-size: 62px;
+        }
+
+        .landing-subtitle {
+            font-size: 18px;
+        }
+
+        .section-one {
+            margin-top: -10vh;
+        }
+    }
+</style>
+
+<div class="landing-page">
+  <div class="landing-section section-one">
+    <h1 class="simple-logo landing-header">(SIMPLE)</h1>
+    <h3 class="simple-header landing-subtitle">a simple idle game about simple math</h3>
+  </div>
+
+  <div class="landing-section">
+    <h4 class="simple-paragraph">Start Counting</h4>
+
+    <form method="get" action="{% url 'games' %}">
+      <button class="btn simple-button" type="submit">New Game</button>
+    </form>
+  </div>
 </div>
 
 {% endblock %}

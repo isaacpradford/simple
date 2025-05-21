@@ -13,7 +13,7 @@ def render_games_page(request):
     games = request.user.games.order_by("id")
 
     for game in games:
-        update_score(game.score)
+        update_score(game.score, True)
 
     return render(
         request, 
