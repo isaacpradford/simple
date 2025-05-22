@@ -4,6 +4,7 @@ import os
 import sys
 
 # Command to run the server: python3 manage.py runserver
+# Command to run the server with gunicorn: python3 -m gunicorn backend.asgi:application -k uvicorn.workers.UvicornWorker
 # Command to make db migration: python3 manage.py makemigrations
 # Command to run db migration: python3 manage.py migrate
 
