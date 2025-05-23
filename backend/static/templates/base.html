@@ -57,6 +57,8 @@
       html {
         color: var(--font-color);
         height: 100%;
+        background: var(--background-color);
+        overflow-x:hidden;
       }
 
       body {
@@ -68,6 +70,7 @@
       nav {
         grid-row: 1;
       }
+
       .offcanvas {
         background-color: var(--background-color);
         color: var(--font-color);
@@ -173,7 +176,6 @@
         font-optical-sizing: auto;
         font-weight: 200;
         font-style: normal;
-
       }
 
       @keyframes animate {
@@ -211,7 +213,7 @@
         background: var(--main-color-opaque);
         border-radius: 50%;
       }
-      
+
       .background li:nth-child(0) {
         left: 80%;
         width: 280px;
@@ -278,7 +280,6 @@
         animation: animate 40s linear infinite;
         animation-delay: 5s;
       }
-
     </style>
   </head>
 
@@ -321,9 +322,11 @@
 
           <div class="offcanvas-body">
             <ul
-            class="navbar-nav justify-content-end align-items-end flex-grow-1"
+              class="navbar-nav justify-content-end align-items-end flex-grow-1"
             >
-              <p class="simple-header" style="font-size: 24px;">Hi, {{user.username}}</p>
+              <p class="simple-header" style="font-size: 24px">
+                Hi, {{user.username}}
+              </p>
               <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="/games/"
                   >Your Games</a
@@ -352,7 +355,11 @@
           </div>
 
           <div class="venmo-section">
-          <a class="venmo-link" href="http://venmo.com/isaac-radford?txn=pay&amount=5.00&note=Thanks+for+the+game">&#8594; Buy Me a Coffee?</a>
+            <a
+              class="venmo-link"
+              href="http://venmo.com/isaac-radford?txn=pay&amount=5.00&note=Thanks+for+the+game"
+              >&#8594; Buy Me a Coffee?</a
+            >
           </div>
         </div>
         {% else %}
@@ -364,7 +371,7 @@
       </div>
     </nav>
 
-    <ul class="background">
+    <!-- <ul class="background">
       <li></li>
       <li></li>
       <li></li>
@@ -372,7 +379,7 @@
       <li></li>
       <li></li>
       <li></li>
-    </ul>
+    </ul> -->
 
     <main class="container d-flex flex-column align-items-center">
       {% block content %}{% endblock %}

@@ -39,7 +39,7 @@
     position: absolute;
     background-color: var(--font-color);
     color: var(--background-color);
-    
+
     padding: 6px 10px;
     border-radius: 4px;
     font-size: 14px;
@@ -53,137 +53,208 @@
 
   .tooltip::after {
     font-size: 10px;
-
     content: " Tooltips can be disabled in your settings.";
   }
 
   .tooltip.show {
     opacity: 1;
   }
+
+  .simple-game {
+    max-height: calc(100vh - 140px);
+    height: 100%;
+  }
+
+  .simple-game-score {
+    height: 100%;
+    min-width: 50vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    min-width: 50vw;
+    overflow-y: scroll;
+    overflow-x: none;
+  }
+
+  .simple-game-numbers {
+    height: 100%;
+    min-width: 50vw;
+    overflow-y: scroll;
+    overflow-x: none;
+  }
+
+  @media only screen and (max-width: 600px) {
+    .simple-game {
+      height: auto;
+      max-height: none;
+    }
+
+    .simple-game-numbers {
+      width: 100vw;
+    }
+  }
 </style>
 
 <span id="game-id" style="display: none">{{ game.id }}</span>
 <span id="game-timer-hidden" style="display: none"
-  >{{ game.time_elapsed }}</span
->
+  >{{ game.time_elapsed }}</span>
+<span class="simple-paragraph" id="game-timer"></span>
 
-<div class="pb-5 d-flex flex-column align-items-center">
-  <span class="simple-paragraph" id="game-timer"></span>
+{% if first_game and game.time_elapsed < 15 %}
+  <p>FIRST GAME</p>
+{% endif %}
 
-  <div class="d-flex flex-column justify-content-center align-items-center p-5">
-    <h1 class="text-break simple-header" style="font-size: 56px">
-      <span class="tooltip-trigger"  data-tooltip="This number is your Score, which can be used to buy new numbers, buttons, or time." id="user-score"></span>
-    </h1>
-
-    <h5 class="simple-paragraph">
-      <div class="d-flex flex-row gap-1 tooltip-trigger" data-tooltip="This number is your Increment, which is the sum total of all of your purchased numbers.">
-        <span id="user-increment">{{ score.increment }} / </span>
-        <span id="time-increment">{{ score.time_increment }}</span>
-        <p>seconds</p>
-      </div>
-    </h5>
-
-    <h2><span id="increment-countdown"></span></h2>
-
-    <div style="height: 10px; width: 40vw" class="position-relative" id="timer">
-      <div
-        style="border: 1px solid var(--main-color); width: 40vw; height: 10px"
-        class="position-absolute"
-        id="timer-outline"
-      ></div>
-      <div
-        style="
-          height: 10px;
-          width: 0px;
-          transition: 0.2s linear;
-          background-color: var(--main-color);
-        "
-        class="position-absolute"
-        id="timer-bar"
-      ></div>
-    </div>
-  </div>
-
-  <div>
-    <button id="main-button">Click Me</button>
-  </div>
-
-  <div class="d-flex flex-column justify-content-center align-items-center p-5">
-    <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
-      Next Number:
-    </h1> -->
-    <h2 class="simple-paragraph d-flex flex-column align-items-center" >
-      <span id="next_number">+{{ form.next_integer }}</span>
-      <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
-        >Costs: {{ form.next_integer_cost }}</span
-      >
-    </h2>
-
-    <button
-      id="purchase-next-number"
-      class="purchase-next-number btn game-button tooltip-trigger"
-      data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+<div class="simple-game d-flex flex-column flex-sm-row flex-md-row flex-lg-row">
+  <div class="simple-game-score d-flex flex-column align-items-center">
+    <div
+      class="d-flex flex-column justify-content-center align-items-center p-5"
     >
-      Purchase
-    </button>
-  </div>
+      <h1 class="text-break simple-header" style="font-size: 56px">
+        <span
+          class="tooltip-trigger"
+          data-tooltip="This number is your Score, which can be used to buy new numbers, buttons, or time."
+          id="user-score"
+          style="font-weight: 600; font-size: 84px"
+        ></span>
+      </h1>
 
-  <div class="d-flex flex-row gap-2">
-    {% if next_button != 1000 %}
-    <button id="purchase-next-button" class="btn game-button tooltip-trigger" data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster.">
-      Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
-    </button>
-    {% endif %} {% if time_increment > 5 %}
-    <button id="purchase-next-second" class="btn game-button tooltip-trigger" data-tooltip="Subtract a second from your timer.">
-      -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
-    </button>
-    {% endif %}
-  </div>
-</div>
+      <h5 class="simple-paragraph">
+        <div
+          class="d-flex flex-row gap-1 tooltip-trigger"
+          data-tooltip="This number is your Increment, which is the sum total of all of your purchased numbers."
+        >
+          <span id="user-increment">{{ score.increment }} / </span>
+          <span id="time-increment">{{ score.time_increment }}</span>
+          <p>seconds</p>
+        </div>
+      </h5>
 
-<ul id="number-list" class="d-flex flex-row flex-wrap gap-2 p-0">
-  {% for number in numbers %}
-  <li
-    class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25"
-  >
-    <div class="d-flex flex-column justify-content-center align-items-center">
-      <h5 class="text-break">{{ number.integer}}</h5>
-      <p class="text-break">{{ number.quantity }}</p>
+      <h2><span id="increment-countdown"></span></h2>
+
+      <div
+        style="height: 10px; width: 40vw"
+        class="position-relative"
+        id="timer"
+      >
+        <div
+          style="border: 1px solid var(--main-color); width: 40vw; height: 10px"
+          class="position-absolute"
+          id="timer-outline"
+        ></div>
+        <div
+          style="
+            height: 10px;
+            width: 0px;
+            transition: 0.2s linear;
+            background-color: var(--main-color);
+          "
+          class="position-absolute"
+          id="timer-bar"
+        ></div>
+      </div>
+    </div>
+
+    <div>
+      <button id="main-button">Click Me</button>
     </div>
 
     <div class="d-flex flex-row gap-2">
-      <div class="d-flex flex-row flex-wrap gap-2">
-        <div class="d-flex flex-row flex-wrap">
-          <div class="btn-group tooltip-trigger"
-          data-tooltip="Increase/Decrease the quantity of this number. Costs 10x the number size!">
-            {% for amount in buttons %}
-            <button
-              data-action="increase"
-              data-id="{{ number.id }}"
-              data-amount="{{ amount }}"
-              class="update-button btn game-button"
-            >
-              +{{ amount }}
-            </button>
-            {% endfor %} {% for amount in buttons %}
-            <button
-              data-action="decrease"
-              data-id="{{ number.id }}"
-              data-amount="{{ amount }}"
-              class="update-button btn game-button"
-            >
-              -{{ amount }}
-            </button>
-            {% endfor %}
+      {% if next_button != 1000 %}
+      <button
+        id="purchase-next-button"
+        class="btn game-button tooltip-trigger"
+        data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster."
+      >
+        Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+      </button>
+      {% endif %} {% if time_increment > 5 %}
+      <button
+        id="purchase-next-second"
+        class="btn game-button tooltip-trigger"
+        data-tooltip="Subtract a second from your timer."
+      >
+        -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <ul class="simple-game-numbers">
+    <div
+      class="purchase-numbers d-flex flex-column justify-content-center align-items-center p-5"
+    >
+      <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
+      Next Number:
+    </h1> -->
+      <h2 class="simple-paragraph d-flex flex-column align-items-center">
+        <span id="next_number" style="font-size: 46px; font-weight: 600"
+          >+{{ form.next_integer }}</span
+        >
+        <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
+          >Costs: {{ form.next_integer_cost }}</span
+        >
+      </h2>
+
+      <button
+        id="purchase-next-number"
+        class="purchase-next-number btn game-button tooltip-trigger"
+        data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+      >
+        Purchase
+      </button>
+    </div>
+
+    <div
+      class="number-list d-flex flex-row flex-wrap gap-2 p-0"
+      id="number-list"
+    >
+      {% for number in numbers %}
+      <li
+        class="d-flex flex-column m-auto justify-content-center align-items-center mb-5"
+      >
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <h5 class="text-break">{{ number.integer}}</h5>
+          <p class="text-break">{{ number.quantity }}</p>
+        </div>
+
+        <div class="d-flex flex-row gap-2">
+          <div class="d-flex flex-row flex-wrap gap-2">
+            <div class="d-flex flex-row flex-wrap">
+              <div
+                class="btn-group tooltip-trigger"
+                data-tooltip="Increase/Decrease the quantity of this number. Costs 10x the number size!"
+              >
+                {% for amount in buttons %}
+                <button
+                  data-action="increase"
+                  data-id="{{ number.id }}"
+                  data-amount="{{ amount }}"
+                  class="update-button btn game-button"
+                >
+                  +{{ amount }}
+                </button>
+                {% endfor %} {% for amount in buttons %}
+                <button
+                  data-action="decrease"
+                  data-id="{{ number.id }}"
+                  data-amount="{{ amount }}"
+                  class="update-button btn game-button"
+                >
+                  -{{ amount }}
+                </button>
+                {% endfor %}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </li>
+      {% endfor %}
     </div>
-  </li>
-  {% endfor %}
-</ul>
-
-
+  </ul>
+</div>
 
 <script>
   const gameId = document.getElementById("game-id").textContent;
@@ -441,7 +512,7 @@
             .join("");
 
           const newHTML = `
-          <li class="d-flex flex-column m-auto justify-content-center align-items-center mb-5 w-25">
+          <li class="d-flex flex-column m-auto justify-content-center align-items-center mb-5">
             <div class="d-flex flex-column justify-content-center align-items-center">
               <h5 class="text-break">${data.new_number}</h5>
               <p class="text-break">1</p>
@@ -470,9 +541,9 @@
       }
     });
 
-
   // Load the tooltips unless tooltips is false (set in settings)
   document.addEventListener("DOMContentLoaded", () => {
+    
     const tooltipEnabled = localStorage.getItem("tooltips") == "true";
     if (!tooltipEnabled) return;
 

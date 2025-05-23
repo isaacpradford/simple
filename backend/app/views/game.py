@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 
 from django.db import transaction
 from django.http import JsonResponse
@@ -21,6 +21,11 @@ from ..utils.check_digit_limit import check_digit_limit
 @transaction.atomic  # ensures all functions finish or don't run at all
 def render_game(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    games = get_list_or_404(Game, user=request.user)
+    
+    first_game = len(games) <= 1
+    
+    print(first_game)
 
     score = game.score
     numbers = game.numbers.order_by("-integer")
@@ -54,6 +59,7 @@ def render_game(request, game_id):
             "time_increment": time_increment,
             "next_second_cost": "{:,}".format(int(next_second_cost)),
             "last_updated": score.last_updated,
+            "first_game": first_game
         },
     )
 

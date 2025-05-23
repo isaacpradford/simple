@@ -28,16 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '') == 'False'
+DEBUG = os.environ.get('DJANGO_DEBUG') != 'False'
 
 
 ALLOWED_HOSTS = ["*"] # "127.0.0.1", "localhost"
 
 # Specify configs for JWTs
 REST_FRAMEWORK = {
-    # "DEFAULT_AUTHENTICATION_CLASSES": (
-    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
-    # ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
@@ -167,6 +164,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Enable secure cookies, set to False when working locally
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE =  os.environ.get('DJANGO_DEBUG') == 'False'
+CSRF_COOKIE_SECURE =  os.environ.get('DJANGO_DEBUG') == 'False'
+SECURE_SSL_REDIRECT =  os.environ.get('DJANGO_DEBUG') == 'False'
