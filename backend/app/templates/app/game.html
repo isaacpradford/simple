@@ -1,111 +1,104 @@
-{% extends 'base.html' %} {% block title %}Game - Simple{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block title %}Game - Simple{% endblock %} {% block content %} {% load static %}
 
-<style>
-  .response-message {
-    animation: floatAndFade 2s ease-out forwards;
-    pointer-events: none;
-    z-index: 6;
-    font-weight: bold;
-    font-size: 1.2rem;
-    transform: translate(0, 0) rotate(0);
-  }
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/tutorial.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/tooltip.css' %}" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/message-animation.css' %}"
+/>
 
-  @keyframes floatAndFade {
-    0% {
-      opacity: 1;
-      transform: translate(0, 0) rotate(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(var(--dx), var(--dy)) rotate(var(--rotation));
-    }
-  }
-
-  ::-webkit-scrollbar {
-    width: 12px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: var(--background-color);
-    border-radius: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-color: var(--gray-color);
-  }
-
-  .tooltip {
-    position: absolute;
-    background-color: var(--font-color);
-    color: var(--background-color);
-
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-size: 14px;
-    max-width: 300px;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    cursor: pointer;
-  }
-
-  .tooltip::after {
-    font-size: 10px;
-    content: " Tooltips can be disabled in your settings.";
-  }
-
-  .tooltip.show {
-    opacity: 1;
-  }
-
-  .simple-game {
-    max-height: calc(100vh - 140px);
-    height: 100%;
-  }
-
-  .simple-game-score {
-    height: 100%;
-    min-width: 50vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    min-width: 50vw;
-    overflow-y: scroll;
-    overflow-x: none;
-  }
-
-  .simple-game-numbers {
-    height: 100%;
-    min-width: 50vw;
-    overflow-y: scroll;
-    overflow-x: none;
-  }
-
-  @media only screen and (max-width: 600px) {
-    .simple-game {
-      height: auto;
-      max-height: none;
-    }
-
-    .simple-game-numbers {
-      width: 100vw;
-    }
-  }
-</style>
+<script src="{% static 'scripts/formatTimer.js' %}"></script>
+<script src="{% static 'scripts/game/playMessageAnimation.js' %}"></script>
+<script src="{% static 'scripts/game/updateTimers.js' %}"></script>
 
 <span id="game-id" style="display: none">{{ game.id }}</span>
 <span id="game-timer-hidden" style="display: none"
-  >{{ game.time_elapsed }}</span>
+  >{{ game.time_elapsed }}</span
+>
 <span class="simple-paragraph" id="game-timer"></span>
 
 {% if first_game and game.time_elapsed < 15 %}
-  <p>FIRST GAME</p>
+<div class="tutorial" id="tutorial">
+  <button id="close-tutorial">X</button>
+
+  <div class="tutorial-intro">
+    <h3>Welcome to Simple</h3>
+    <p>An idle game about simple math</p>
+    <h6>Here's a quick tutorial:</h6>
+  </div>
+
+  <div class="tutorial-section">
+    <div class="tutorial-text">
+      <p>
+        <strong
+          >The goal of the game is to get the highest Score possible.</strong
+        >
+        You can increase your Score in two ways: by letting 15 seconds pass or
+        by clicking the 'click me' button. This will increase your score by your
+        Increment.
+      </p>
+    </div>
+    <div class="tutorial-image-container">
+      <img
+        class="tutorial-image"
+        src="{% static 'images/score-tutorial.png' %}"
+        alt="Visual explanation of how purchasing numbers works in this game."
+        style="width: 60%"
+      />
+    </div>
+  </div>
+
+  <div class="tutorial-section">
+    <div class="tutorial-text">
+      <p>
+        To increase your Increment, you can unlock new Numbers.
+        <strong
+          >Your increment is the sum total of all your numbers and their
+          quantities, </strong
+        >as shown below. In this instance, there is 1 four, 2 twos, and 1 one,
+        which adds up to an Increment of 11. Unlocking a number costs 100x its
+        size, while increasing its quantity only costs 10x.
+      </p>
+    </div>
+
+    <div class="tutorial-image-container">
+      <img
+        class="tutorial-image"
+        src="{% static 'images/numbers-tutorial.png' %}"
+        alt="Visual explanation of how purchasing numbers works in this game."
+      />
+    </div>
+  </div>
+
+  <div class="tutorial-section">
+    <div class="tutorial-text">
+      <p>
+        Lastly, you can make it easier to get points by buying new +/- buttons
+        or decreasing the timer!
+      </p>
+    </div>
+    <div class="tutorial-image-container">
+      <img
+        class="tutorial-image"
+        src="{% static 'images/purchase-buttons-tutorial.png' %}"
+        alt="Visual explanation of how purchasing buttons works."
+      />
+    </div>
+  </div>
+
+  <div class="tutorial-closing">
+    <h6>And that's it. Good luck!</h6>
+  </div>
+</div>
 {% endif %}
 
-<div class="simple-game d-flex flex-column flex-sm-row flex-md-row flex-lg-row">
+<div
+  id="simple-game"
+  class="simple-game d-flex flex-column flex-sm-row flex-md-row flex-lg-row"
+>
   <div class="simple-game-score d-flex flex-column align-items-center">
     <div
       class="d-flex flex-column justify-content-center align-items-center p-5"
@@ -201,7 +194,7 @@
         class="purchase-next-number btn game-button tooltip-trigger"
         data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
       >
-        Purchase
+        Unlock
       </button>
     </div>
 
@@ -259,9 +252,11 @@
 <script>
   const gameId = document.getElementById("game-id").textContent;
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  let game = document.getElementById("simple-game");
   let time = document.getElementById("time-increment").textContent;
   let updateInterval = time * 1000; // users time increment in ms
   let lastScoreUpdate = Date.now();
+
 
   let scoreInterval = null;
   function setScoreInterval() {
@@ -269,38 +264,7 @@
     scoreInterval = setInterval(updateScore, updateInterval);
   }
 
-  function playMessageAnimation(success, button, message) {
-    const rect = button.getBoundingClientRect();
-    const msg = document.createElement("div");
-    msg.classList.add("response-message");
-    msg.textContent = message;
-
-    // Position relative to the button
-    msg.style.left = `${rect.left + rect.width / 2}px`;
-    msg.style.top = `${rect.top - 10}px`;
-    msg.style.position = "fixed";
-
-    msg.style.color = success ? "#46d467" : "#ff5656";
-
-    const angle = 45 + Math.random() * 90; // Random angle from 45-135
-    const distance = -100; // Pixels
-    const angleRad = (angle * Math.PI) / 180;
-    const dx = Math.cos(angleRad) * distance;
-    const dy = Math.sin(angleRad) * distance;
-
-    const rotation = Math.random() * 60 - 30;
-
-    msg.style.setProperty("--dx", `${dx}px`);
-    msg.style.setProperty("--dy", `${dy}px`);
-    msg.style.setProperty("--rotation", `${rotation}deg`);
-
-    document.body.appendChild(msg);
-
-    setTimeout(() => {
-      msg.remove();
-    }, 2000);
-  }
-
+  // Click the 'click me' button and increase score
   const clickButton = document.getElementById("main-button");
   if (clickButton) {
     clickButton.addEventListener("click", async () => {
@@ -328,7 +292,6 @@
     });
   }
 
-  // if (clickButton)
   // Purchase Time
   const purchaseSecond = document.getElementById("purchase-next-second");
   if (purchaseSecond) {
@@ -347,7 +310,7 @@
         if (data.success) {
           document.getElementById("user-score").textContent = data.new_score;
           document.getElementById("time-increment").textContent =
-            data.new_timer + " seconds";
+            data.new_timer;
           document.getElementById("next-second-cost").textContent =
             data.new_timer_cost;
           updateInterval = parseInt(data.new_timer) * 1000;
@@ -454,9 +417,7 @@
 
   // Purchase Number: Purchase the next number available
   const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
-  document
-    .getElementById("purchase-next-number")
-    .addEventListener("click", async (e) => {
+  document.getElementById("purchase-next-number").addEventListener("click", async (e) => {
       try {
         const response = await fetch("{% url 'purchase_number' game.id %}", {
           method: "POST",
@@ -541,9 +502,24 @@
       }
     });
 
+  let closeTutorial = document.getElementById("close-tutorial");
+  if (closeTutorial) {
+    closeTutorial.addEventListener("click", () => {
+      document.getElementById("tutorial").style.display = "none";
+      game.style.opacity = 1;
+      game.style.filter = "blur(0px)";
+    });
+  }
+
   // Load the tooltips unless tooltips is false (set in settings)
   document.addEventListener("DOMContentLoaded", () => {
-    
+    const tutorialOpen = document.getElementById("tutorial");
+    console.log(tutorialOpen);
+    if (tutorialOpen) {
+      game.style.opacity = 0.2;
+      game.style.filter = "blur(2px)";
+    }
+
     const tooltipEnabled = localStorage.getItem("tooltips") == "true";
     if (!tooltipEnabled) return;
 
@@ -584,32 +560,6 @@
           "+" + data.increment
         );
       });
-  }
-
-  function formatTimer(timeInSeconds) {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-      2,
-      "0"
-    )}`;
-  }
-
-  function updateTimer() {
-    let timerElement = document.getElementById("game-timer-hidden");
-    let timer = parseInt(timerElement.textContent);
-    timer += 1;
-    timerElement.textContent = timer;
-    document.getElementById("game-timer").textContent = formatTimer(timer);
-  }
-
-  function updateTimerAnimation() {
-    const now = Date.now();
-    const elapsed = now - lastScoreUpdate;
-    const progress = (elapsed % updateInterval) / updateInterval;
-    const width = progress * 100;
-
-    document.getElementById("timer-bar").style.width = `${width}%`;
   }
 
   updateScore();

@@ -1,71 +1,8 @@
 {% extends "base.html" %} {% block content %}
+{% load static %}
 
-<style>
-  .login-parent {
-    display: flex;
-    flex-direction: row;
-    background-color: var(--background-color);
-    border: 1px solid var(--main-color);
-    border-radius: 5px;
-    padding: 50px;
-    gap: 5vw;
-
-    box-shadow: 10px 10px 0px var(--main-color);
-
-    margin: auto;
-    min-width: 200px;
-    min-height: 300px;
-  }
-
-  .login-title {
-    width: 50%;
-    color: var(--main-color);
-    border-right: 1px solid var(--main-color);
-  }
-
-  .login-title h2 {
-    font-size: 32px;
-    font-family: var(--main-font);
-    font-weight: 400;
-    padding: 5px;
-    font-style: normal;
-    transition: 0.2s ease-in-out;
-  }
-
-  .login-title p {
-    font-family: var(--article-font);
-    font-size: 24px;
-    font-weight: 300;
-    max-width: 70%;
-  }
-
-  .login-form {
-    width: 50%;
-  }
-
-  .login-form input {
-    width: 100%;
-  }
-
-  .form-label {
-    font-family: var(--article-font);
-    font-size: 14px;
-    color: gray;
-  }
-
-  @media only screen and (max-width: 600px) {
-    .login-parent {
-      flex-direction: column;
-    }
-    .login-title {
-      width: 100%;
-    }
-
-    .login-form {
-      width: 100%;
-    }
-  }
-</style>
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/registration.css' %}">
 
 <div class="login-parent">
   <div class="login-title">

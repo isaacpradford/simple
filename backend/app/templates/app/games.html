@@ -1,13 +1,9 @@
 {% extends 'base.html' %} {% block title %}Games - Simple{% endblock %} 
-{% block content %}
-<style>
-  .simple-card {
-    background-color: var(--background-color);
-    padding: 10px;
-    border: 1px solid rgb(219, 219, 219);
-    border-radius: 20px;
-  }
-</style>
+{% block content %} {% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+
+<script src="{% static 'scripts/formatTimer.js' %}"></script>
 
 <div class="container text-center">
   <h1 class="simple-header">Your Games</h1>
@@ -42,15 +38,6 @@
 </div>
 
 <script>
-  function formatTimer(timeInSeconds) {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-      2,
-      "0"
-    )}`;
-  }
-
   const renderedGames = document.getElementsByClassName("time-elapsed");
 
   function renderTimes() {

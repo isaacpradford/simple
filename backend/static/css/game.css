@@ -1,0 +1,49 @@
+.simple-game {
+  max-height: calc(100vh - 140px);
+  height: 100%;
+}
+
+.simple-game-score {
+  height: 100%;
+  min-width: 50vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  overflow-y: scroll;
+  overflow-x: none;
+}
+
+.simple-game-numbers {
+  height: 100%;
+  min-width: 50vw;
+  overflow-y: scroll;
+  overflow-x: none;
+}
+
+@media only screen and (max-width: 768px) {
+  .simple-game {
+    height: auto;
+    max-height: none;
+    width: 100vw;
+  }
+
+  .simple-game-score {
+    width: 100vw;
+  }
+
+  .simple-game-numbers {
+    width: 100vw;
+  }
+
+  .tutorial-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .tutorial-text,
+  .tutorial-image-container {
+    width: 100%;
+    padding: 5px;
+  }
+}

@@ -1,0 +1,54 @@
+.tutorial {
+  position: absolute;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 100;
+  width: 60vw;
+  height: 80vh;
+  background-color: var(--background-color);
+  border: 1px solid var(--main-color);
+  padding: 32px;
+  border-radius: 6px;
+  min-width: 350px;
+  min-height: 600px;
+  font-family: var(--article-font);
+}
+
+#close-tutorial {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.tutorial-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 60px;
+  font-family: var(--article-font);
+}
+
+.tutorial-section.reverse {
+  flex-direction: row-reverse;
+}
+
+.tutorial-text,
+.tutorial-image-container {
+  flex: 1;
+
+  padding: 10px;
+}
+
+.tutorial-intro {
+  text-align: center;
+}
+
+.tutorial-image-container {
+  display: flex;
+  justify-content: center;
+}
+
+.tutorial-image {
+  max-width: 100%;
+  height: auto;
+}

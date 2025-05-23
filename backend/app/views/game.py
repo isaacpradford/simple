@@ -34,13 +34,12 @@ def render_game(request, game_id):
         num.integer = "{:,}".format(int(num.integer))
 
     update_score(score, True)
-
     form = PurchaseNumberForm(request.POST or None, game_id=game_id)
 
     # +/- buttons
     buttons = [10**i for i in range(score.purchased_buttons)]
     next_button = max(n for n in buttons) * 10
-    next_button_cost = next_button * 10
+    next_button_cost = next_button * 100
 
     time_increment = score.time_increment
     next_second_cost = calculate_time_cost(time_increment)
@@ -261,7 +260,7 @@ def purchase_button(request, game_id):
     if current_buttons >= 3:
         return JsonResponse({"success": False, "message": "No more buttons!"})
 
-    cost = Decimal(10) ** (current_buttons + 1)
+    cost = Decimal(10) ** (current_buttons + 2)
 
     if score.score_value < cost:
         return JsonResponse({"success": False, "message": "Not enough points!"})
@@ -273,7 +272,6 @@ def purchase_button(request, game_id):
     formatted_val = "{:,}".format(10**(score.purchased_buttons - 1))
 
     # return redirect(to="/games/" + str(game_id))
-
     return JsonResponse(
         {
             "success": True,

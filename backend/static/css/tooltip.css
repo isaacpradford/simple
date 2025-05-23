@@ -1,0 +1,24 @@
+.tooltip {
+  position: absolute;
+  background-color: var(--font-color);
+  color: var(--background-color);
+
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  max-width: 300px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.tooltip::after {
+  font-size: 10px;
+  content: " Tooltips can be disabled in your settings.";
+}
+
+.tooltip.show {
+  opacity: 1;
+}

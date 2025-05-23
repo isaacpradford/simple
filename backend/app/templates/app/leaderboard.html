@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
-{% block title %}Leaderboard - Simple{% endblock %}
+{% extends 'base.html' %} {% block title %}Leaderboard - Simple{% endblock %} {% block content %} {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<script src="{% static 'scripts/formatTimer.js' %}"></script>
 
-{% block content %}
 <h1 class="simple-title">Leaderboard</h1>
 
 <table class="table table-striped text-center invert">
@@ -28,19 +28,11 @@
 <script>
   const renderedTimes = document.getElementsByClassName("time-elapsed");
 
-  function formatTimer(timeInSeconds) {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-      2,
-      "0"
-    )}`;
-  }
-
   function renderTimes() {
-      console.log(renderedTimes)
-      for (i = 0; i < renderedTimes.length; i++) {
-      renderedTimes[i].innerHTML = formatTimer(parseInt(renderedTimes[i].innerHTML));
+    for (i = 0; i < renderedTimes.length; i++) {
+      renderedTimes[i].innerHTML = formatTimer(
+        parseInt(renderedTimes[i].innerHTML)
+      );
     }
   }
 
