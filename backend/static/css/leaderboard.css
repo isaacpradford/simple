@@ -1,0 +1,26 @@
+.simple-leaderboard {
+    height: calc(100vh - 70px);
+    width: 100vw;
+
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.simple-title {
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.simple-table {
+    width: 75%;
+}
+
+.simple-table th {
+    color: var(--highlight-color);
+}
+
+.simple-table td {
+    color: var(--highlight-color);
+}

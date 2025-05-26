@@ -1,44 +1,84 @@
+@import url("https://fonts.googleapis.com/css2?family=Anton&display=swap");
+
 .landing-page {
   height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  overflow:hidden;
+  /* justify-content: space-between; */
+  /* align-items: start; */
+  z-index: 0;
+}
+
+.landing-background {
+  z-index: 1;
+  /* position: absolute; */
+  width: 100vw;
+  height: calc(100vh - 70px);
+  /* filter: blur(10px); */
+  /* opacity: .2; */
+}
+
+.landing-content {
+  z-index: 2;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+
+  background-color: var(--background-color);
+  z-index: 5;
+  height: 40vh;
+  /* padding: 12px; */
 }
 
 .landing-header {
-  font-size: 78px;
+  z-index: 1;
+  margin: 0;
+  padding: 20px;
+}
+
+.landing-header ol {
+  display: flex;
+  gap: 40px;
+  font-style: italic;
 }
 
 .landing-subtitle {
   font-family: var(--article-font);
   font-weight: 200;
   font-size: 24px;
+  text-wrap: nowrap;
 }
 
-.landing-section {
+.landing-form {
+  padding: 20px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2.5vh;
+  flex-direction: row;
 }
 
-.section-one {
-  margin-top: -20vh;
+.landing-form button {
+  width: 300px;
 }
 
 @media only screen and (max-width: 600px) {
-  .landing-header {
-    font-size: 62px;
-  }
-
   .landing-subtitle {
     font-size: 18px;
   }
 
-  .section-one {
-    margin-top: -10vh;
+  .landing-header ol {
+    display: flex;
+    flex-direction: column;
+    text-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .landing-form button {
+    width: 150px;
+    margin-right: 2.5vw;
   }
 }

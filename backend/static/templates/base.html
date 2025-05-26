@@ -10,7 +10,7 @@
     <link
       rel="icon"
       type="image/x-icon"
-      href="{% static 'images/favicon.png' %}"
+      href="{% static 'images/favicon.svg' %}"
     />
 
     <!-- Font Imports -->
@@ -39,7 +39,7 @@
         --gray-color: #d6d6d6;
         --main-color: #051be8;
         --main-color-opaque: #051ce848;
-        --highlight-color: #3a4dfe;
+        --highlight-color: #051be8;
         --button-color: #041183;
         --game-button-color: #5667ff;
 
@@ -67,7 +67,10 @@
   <body>
     <nav class="navbar navbar-collapse fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand simple-logo" href="/games/">(SIMPLE)</a>
+        <a class="simple-logo" href="/games/">
+          <img class="simple-icon" src="{% static 'images/favicon.svg' %}" alt="simple logo" />
+        </a>
+
         {% if user.is_authenticated %}
         <button
           class="navbar-toggler"
@@ -87,12 +90,13 @@
           aria-labelledby="offcanvasNavbarLabel"
         >
           <div class="offcanvas-header">
-            <h5
+            <!-- <h5
               class="offcanvas-title simple-logo display-5"
               id="offcanvasNavbarLabel"
             >
               (SIMPLE)
-            </h5>
+            </h5> -->
+            <img class="simple-icon" src="{% static 'images/favicon.svg' %}" alt="simple logo" />
             <button
               type="button"
               class="btn-close invert"
@@ -162,7 +166,7 @@
       <li></li>
     </ul> -->
 
-    <main class="container d-flex flex-column align-items-center">
+    <main class="d-flex flex-column align-items-center">
       {% block content %}{% endblock %}
     </main>
 

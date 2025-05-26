@@ -1,29 +1,49 @@
 {% extends 'base.html' %} {% block title %}Leaderboard - Simple{% endblock %} {% block content %} {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/leaderboard.css' %}"
+/>
 <script src="{% static 'scripts/formatTimer.js' %}"></script>
 
-<h1 class="simple-title">Leaderboard</h1>
+<ul class="background">
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <!-- <li></li> -->
+</ul>
 
-<table class="table table-striped text-center invert">
-  <thead>
-    <tr>
-      <th scope="col">Rank</th>
-      <th scope="col">Username</th>
-      <th scope="col">Score</th>
-      <th scope="col">Time Elapsed (s)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for score in scores %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ score.game.user.username }}</td>
-      <td class="text-break">{{ score.score_value }}</td>
-      <td class="time-elapsed">{{ score.game.time_elapsed }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="simple-leaderboard">
+  <h1 class="simple-title">Leaderboard</h1>
+
+  <table class="table simple-table text-center">
+    <thead>
+      <tr>
+        <th scope="col">Rank</th>
+        <th scope="col">Username</th>
+        <th scope="col">Score</th>
+        <th scope="col">Time Elapsed (s)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for score in scores %}
+      <tr>
+        <td scope="row">{{ forloop.counter }}</td>
+        <td>{{ score.game.user.username }}</td>
+        <td class="text-break">{{ score.score_value }}</td>
+        <td class="time-elapsed">{{ score.game.time_elapsed }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <script>
   const renderedTimes = document.getElementsByClassName("time-elapsed");

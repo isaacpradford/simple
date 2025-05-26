@@ -10,7 +10,7 @@
     <link
       rel="icon"
       type="image/x-icon"
-      href="{% static 'images/favicon.png' %}"
+      href="{% static 'images/favicon.svg' %}"
     />
 
     <!-- Font Imports -->
@@ -31,12 +31,46 @@
     {% if user.is_authenticated %}
     <meta name="csrf-token" content="{{ csrf_token }}" />
     {% endif %}
+
+    <style>
+      :root {
+        --background-color: #fdfdff;
+        --background-color-opaque: #fdfdff5f;
+        --gray-color: #d6d6d6;
+        --main-color: #051be8;
+        --main-color-opaque: #051ce848;
+        --highlight-color: #051be8;
+        --button-color: #041183;
+        --game-button-color: #5667ff;
+
+        --font-color: #000;
+        --main-font: "Moirai One", system-ui;
+        --article-font: "Montserrat", sans-serif;
+        --invert: invert(0);
+      }
+
+      .dark-mode {
+        --background-color: #1d1c1c;
+        --background-color-opaque: #1d1c1c5f;
+        --font-color: #f5f5f5;
+        --gray-color: #333;
+        --main-color: #8ab4f8;
+        --main-color-opaque: #8ab4f89d;
+        --highlight-color: #4c8bf5;
+        --button-color: #1a73e8;
+        --game-button-color: #5c6bc0;
+        --invert: invert(1);
+      }
+    </style>
   </head>
 
   <body>
     <nav class="navbar navbar-collapse fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand simple-logo" href="/games/">(SIMPLE)</a>
+        <a class="simple-logo" href="/games/">
+          <img class="simple-icon" src="{% static 'images/favicon.svg' %}" alt="simple logo" />
+        </a>
+
         {% if user.is_authenticated %}
         <button
           class="navbar-toggler"
@@ -56,12 +90,13 @@
           aria-labelledby="offcanvasNavbarLabel"
         >
           <div class="offcanvas-header">
-            <h5
+            <!-- <h5
               class="offcanvas-title simple-logo display-5"
               id="offcanvasNavbarLabel"
             >
               (SIMPLE)
-            </h5>
+            </h5> -->
+            <img class="simple-icon" src="{% static 'images/favicon.svg' %}" alt="simple logo" />
             <button
               type="button"
               class="btn-close invert"

@@ -1,34 +1,62 @@
-{% extends 'base.html' %} {% block title %}Games - Simple{% endblock %} 
-{% block content %} {% load static %}
+{% extends 'base.html' %} {% block title %}Games - Simple{% endblock %} {% block content %} {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/games.css' %}" />
 
 <script src="{% static 'scripts/formatTimer.js' %}"></script>
 
+<style>
+  .games-title {
+    background: url("{% static 'images/text-bg.svg' %}");
+    background-size: 50%;
+  }
+</style>
+
 <div class="container text-center">
-  <h1 class="simple-header">Your Games</h1>
-  <div class="d-flex flex-row flex-wrap m-auto justify-content-center gap-3">
+  <div class="games-title">
+    <h1 class="simple-paragraph">Your Games</h1>
+  </div>
+
+  <div
+    class="games d-flex flex-row flex-wrap m-auto justify-content-center gap-3"
+  >
     {% for game in games %}
-    <div style="width: 350px;" class="simple-card h-50">
-      <div class="card-body d-flex flex-column justify-content-center align-items-center">
+    <div style="width: 350px" class="simple-card h-50">
+      <div
+        class="card-body d-flex flex-column justify-content-center align-items-center"
+      >
         <h5 class="card-title simple-header">Game {{ forloop.counter }}</h5>
         <!-- <p class="card-text">Started: {{ game.created_at }}</p> -->
-        <p class="card-text text-truncate simple-paragraph w-75">{{ game.score.score_value }}</p>
-        <span class="d-flex flex-row">Time: <p class="time-elapsed simple-paragraph">{{ game.time_elapsed }}</p></span>
-        <div class="d-flex flex-row justify-content-center align-items-center gap-2">
-          <a href="{% url 'play_game' game.id %}" class="btn simple-button simple-header"
-            >Continue</a>
-          <form
-            method="post"
-            action="{% url 'delete_game' game.id %}"
+        <p class="card-text text-truncate simple-paragraph w-75">
+          {{ game.score.score_value }}
+        </p>
+        <span class="d-flex flex-row gap-2"
+          >Time:
+          <p class="time-elapsed simple-paragraph">
+            {{ game.time_elapsed }}
+          </p></span
+        >
+        <div
+          class="d-flex flex-row justify-content-center align-items-center gap-2"
+        >
+          <a
+            href="{% url 'play_game' game.id %}"
+            class="btn simple-button simple-header"
+            >Continue</a
           >
+          <form method="post" action="{% url 'delete_game' game.id %}">
             {% csrf_token %}
-            <button class="btn btn-danger simple-header">Delete</button>
+            <button class="btn btn-danger">Delete</button>
           </form>
         </div>
       </div>
     </div>
     {% endfor %}
+
+    <form method="post" action="{% url 'new_game' %}" class="simple-card">
+      {% csrf_token %}
+      <button class="blank-button">+</button>
+    </form>
   </div>
 
   <form method="post" action="{% url 'new_game' %}" class="mt-4">

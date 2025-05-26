@@ -22,6 +22,7 @@
 
 .tutorial-section {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 60px;
@@ -35,7 +36,6 @@
 .tutorial-text,
 .tutorial-image-container {
   flex: 1;
-
   padding: 10px;
 }
 
@@ -51,4 +51,21 @@
 .tutorial-image {
   max-width: 100%;
   height: auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .tutorial-text,
+  .tutorial-image-container {
+    width: 100%;
+    padding: 5px;
+  }
+
+  .tutorial-section {
+    flex-direction: column;
+  }
+
+  .reverse  {
+    flex-direction: column;
+  }
+
 }

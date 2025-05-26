@@ -1,25 +1,41 @@
 {% extends 'base.html' %} {% block title %}Simple - An Idle Game{% endblock %}
-{% block content %}
-{% load static %}
+{% block content %} {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}" />
+
+<style>
+  .landing-background {
+    background: url("{% static 'images/bg-pattern-w-name.svg' %}");
+    background-size: 100%;
+    background-position: 0%;
+    background-attachment: fixed;
+  }
+</style>
 
 <div class="landing-page">
-  <div class="landing-section section-one">
-    <h1 class="simple-logo landing-header">(SIMPLE)</h1>
-    <h3 class="simple-header landing-subtitle">
-      a simple idle game about simple math
-    </h3>
+  <div class="landing-content">
+    <!-- <h1 class="simple-logo landing-header">SIMPLE</h1> -->
+
+    <div class="landing-header">
+      <ol class="simple-paragraph">
+        <li>Click Button</li>
+        <li>Pass Time</li>
+        <li>Get a high score</li>
+        <li>Repeat</li>
+      </ol>
+    </div>
+    
+    <div class="landing-form">
+      <form method="get" action="{% url 'games' %}">
+        <button class="btn simple-button" type="submit">New Game</button>
+      </form>
+
+      <!-- <p class="simple-paragraph">Start counting</p> -->
+    </div>
   </div>
 
-  <div class="landing-section">
-    <h4 class="simple-paragraph">Start Counting</h4>
-
-    <form method="get" action="{% url 'games' %}">
-      <button class="btn simple-button" type="submit">New Game</button>
-    </form>
-  </div>
+  <div class="landing-background"></div>
 </div>
 
 {% endblock %}

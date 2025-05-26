@@ -95,10 +95,7 @@
 </div>
 {% endif %}
 
-<div
-  id="simple-game"
-  class="simple-game d-flex flex-column flex-sm-row flex-md-row flex-lg-row"
->
+<div id="simple-game" class="simple-game">
   <div class="simple-game-score d-flex flex-column align-items-center">
     <div
       class="d-flex flex-column justify-content-center align-items-center p-5"
@@ -146,107 +143,117 @@
           id="timer-bar"
         ></div>
       </div>
-    </div>
 
-    <div>
-      <button id="main-button">Click Me</button>
-    </div>
+      <button
+        class="simple-button"
+        id="main-button"
+        style="width: 40vw; padding: 10px; margin: 10px"
+      >
+        Click Me
+      </button>
 
-    <div class="d-flex flex-row gap-2">
-      {% if next_button != 1000 %}
-      <button
-        id="purchase-next-button"
-        class="btn game-button tooltip-trigger"
-        data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster."
+      <div
+        class="d-flex flex-row flex-lg-row flex-md-column flex-sm-column gap-2 m-4"
       >
-        Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
-      </button>
-      {% endif %} {% if time_increment > 5 %}
-      <button
-        id="purchase-next-second"
-        class="btn game-button tooltip-trigger"
-        data-tooltip="Subtract a second from your timer."
-      >
-        -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
-      </button>
-      {% endif %}
+        {% if next_button != 1000 %}
+        <button
+          id="purchase-next-button"
+          class="btn game-button tooltip-trigger"
+          data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster."
+          style="width: 20vw"
+        >
+          Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
+        </button>
+        {% endif %} {% if time_increment > 5 %}
+        <button
+          id="purchase-next-second"
+          class="btn game-button tooltip-trigger"
+          data-tooltip="Subtract a second from your timer."
+          style="width: 20vw"
+        >
+          -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
+        </button>
+        {% endif %}
+      </div>
     </div>
   </div>
 
-  <ul class="simple-game-numbers">
-    <div
-      class="purchase-numbers d-flex flex-column justify-content-center align-items-center p-5"
-    >
-      <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
+  <div id="game-store">
+    <ul class="simple-game-numbers">
+      <div
+        class="purchase-numbers d-flex flex-column justify-content-center align-items-center p-5"
+      >
+        <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
       Next Number:
     </h1> -->
-      <h2 class="simple-paragraph d-flex flex-column align-items-center">
-        <span id="next_number" style="font-size: 46px; font-weight: 600"
-          >+{{ form.next_integer }}</span
-        >
-        <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
-          >Costs: {{ form.next_integer_cost }}</span
-        >
-      </h2>
+        <h2 class="simple-paragraph d-flex flex-column align-items-center">
+          <span id="next_number" style="font-size: 72px; font-weight: 600"
+            >+{{ form.next_integer }}</span
+          >
+          <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
+            >Costs: {{ form.next_integer_cost }}</span
+          >
+        </h2>
 
-      <button
-        id="purchase-next-number"
-        class="purchase-next-number btn game-button tooltip-trigger"
-        data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+        <button
+          id="purchase-next-number"
+          class="purchase-next-number btn game-button tooltip-trigger"
+          data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+        >
+          Unlock
+        </button>
+      </div>
+
+      <div
+        class="number-list d-flex flex-row flex-wrap gap-2 p-0"
+        id="number-list"
       >
-        Unlock
-      </button>
-    </div>
-
-    <div
-      class="number-list d-flex flex-row flex-wrap gap-2 p-0"
-      id="number-list"
-    >
-      {% for number in numbers %}
-      <li
-        class="d-flex flex-column m-auto justify-content-center align-items-center mb-5"
-      >
-        <div
-          class="d-flex flex-column justify-content-center align-items-center"
+        {% for number in numbers %}
+        <li
+          class="d-flex flex-column m-auto justify-content-center align-items-center mb-5"
         >
-          <h5 class="text-break">{{ number.integer}}</h5>
-          <p class="text-break">{{ number.quantity }}</p>
-        </div>
+          <div
+            class="d-flex flex-column justify-content-center align-items-center"
+          >
+            <h5 class="text-break">{{ number.integer}}</h5>
+            <p class="text-break">{{ number.quantity }}</p>
+          </div>
 
-        <div class="d-flex flex-row gap-2">
-          <div class="d-flex flex-row flex-wrap gap-2">
-            <div class="d-flex flex-row flex-wrap">
-              <div
-                class="btn-group tooltip-trigger"
-                data-tooltip="Increase/Decrease the quantity of this number. Costs 10x the number size!"
-              >
-                {% for amount in buttons %}
-                <button
-                  data-action="increase"
-                  data-id="{{ number.id }}"
-                  data-amount="{{ amount }}"
-                  class="update-button btn game-button"
+          <div class="d-flex flex-row gap-2">
+            <div class="d-flex flex-row flex-wrap gap-2">
+              <div class="d-flex flex-row flex-wrap">
+                <div
+                  class="btn-group tooltip-trigger"
+                  data-tooltip="Increase/Decrease the quantity of this number. Costs 10x the number size!"
                 >
-                  +{{ amount }}
-                </button>
-                {% endfor %} {% for amount in buttons %}
-                <button
-                  data-action="decrease"
-                  data-id="{{ number.id }}"
-                  data-amount="{{ amount }}"
-                  class="update-button btn game-button"
-                >
-                  -{{ amount }}
-                </button>
-                {% endfor %}
+                  {% for amount in buttons %}
+                  <button
+                    data-action="increase"
+                    data-id="{{ number.id }}"
+                    data-amount="{{ amount }}"
+                    class="update-button btn game-button"
+                  >
+                    +{{ amount }}
+                  </button>
+                  {% endfor %} {% for amount in buttons %}
+                  <button
+                    data-action="decrease"
+                    data-id="{{ number.id }}"
+                    data-amount="{{ amount }}"
+                    class="update-button btn game-button"
+                  >
+                    -{{ amount }}
+                  </button>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </li>
-      {% endfor %}
-    </div>
-  </ul>
+        </li>
+        {% endfor %}
+      </div>
+    </ul>
+  </div>
 </div>
 
 <script>
@@ -256,7 +263,6 @@
   let time = document.getElementById("time-increment").textContent;
   let updateInterval = time * 1000; // users time increment in ms
   let lastScoreUpdate = Date.now();
-
 
   let scoreInterval = null;
   function setScoreInterval() {
@@ -417,7 +423,9 @@
 
   // Purchase Number: Purchase the next number available
   const buttonAmounts = JSON.parse("{{ buttons|safe|escapejs }}");
-  document.getElementById("purchase-next-number").addEventListener("click", async (e) => {
+  document
+    .getElementById("purchase-next-number")
+    .addEventListener("click", async (e) => {
       try {
         const response = await fetch("{% url 'purchase_number' game.id %}", {
           method: "POST",
