@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
 
@@ -20,8 +19,7 @@ def update_score(score, update_time):
         
         if (update_time):
             score.last_updated += timedelta(seconds=score.time_increment * ticks)
+            game = score.game
+            game.time_elapsed += int(seconds)
+            game.save()
         score.save()
-
-        game = score.game
-        game.time_elapsed += int(seconds)
-        game.save()

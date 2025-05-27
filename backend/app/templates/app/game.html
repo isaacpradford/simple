@@ -172,7 +172,9 @@
         >
           Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
         </button>
-        {% endif %} {% if time_increment > 5 %}
+        {% endif %} 
+
+        {% if time_increment > 5 %}
         <button
           id="purchase-next-second"
           class="btn game-button tooltip-trigger"
@@ -194,10 +196,10 @@
           Next Number:
         </h1> -->
         <h2 class="simple-paragraph d-flex flex-column align-items-center">
-          <span id="next_number" style="font-size: 72px; font-weight: 600"
+          <span id="next_number" style="font-size: 72px; font-weight: 600" class="text-center w-100 text-break"
             >{{ form.next_integer }}</span
           >
-          <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
+          <span id="next_number_cost" style="font-size: 16px; font-weight: 300" class="text-center w-100 text-break"
             >Costs: {{ form.next_integer_cost }}</span
           >
         </h2>
@@ -329,10 +331,14 @@
 
         if (data.success) {
           document.getElementById("user-score").textContent = data.new_score;
-          document.getElementById("time-increment").textContent =
-            data.new_timer;
-          document.getElementById("next-second-cost").textContent =
-            data.new_timer_cost;
+          
+          console.log(data);
+          if (data.new_timer === "5") {
+            document.getElementById('purchase-next-second').style.display = 'none';
+          } else {
+            document.getElementById("time-increment").textContent = data.new_timer;
+            document.getElementById("next-second-cost").textContent = data.new_timer_cost;
+          }
           updateInterval = parseInt(data.new_timer) * 1000;
           setScoreInterval();
           playMessageAnimation(

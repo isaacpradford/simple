@@ -20,7 +20,11 @@ from ..utils.check_digit_limit import check_digit_limit
 @login_required(login_url="/login/")
 @transaction.atomic  # ensures all functions finish or don't run at all
 def render_game(request, game_id):
+    
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
+    
+    
     games = get_list_or_404(Game, user=request.user)
     
     first_game = len(games) <= 1
@@ -97,7 +101,11 @@ def click_main_button(request, game_id):
 @transaction.atomic
 def purchase_number(request, game_id):
     game = get_object_or_404(Game, id=game_id)
+    if request.user != game.user: return
+
     score = game.score
+    
+    if request.user != game.user: return
 
     update_score(score, False)
 
@@ -153,10 +161,13 @@ def purchase_number(request, game_id):
 @transaction.atomic
 def increase_quantity(request, game_id, number_id, amount):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
+
     number = get_object_or_404(Number, id=number_id, game=game_id)
     score = game.score
 
     update_score(score, False)
+    
 
     cost = ( (number.integer * amount) * 10 )  # The cost of increasing number quantity is 10x it's size
     
@@ -203,6 +214,8 @@ def increase_quantity(request, game_id, number_id, amount):
 @transaction.atomic
 def decrease_quantity(request, game_id, number_id, amount):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
+    
     score = game.score
 
     update_score(score, False)
@@ -251,6 +264,7 @@ def decrease_quantity(request, game_id, number_id, amount):
 @transaction.atomic
 def purchase_button(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
     score = game.score
     update_score(score, False)
 
@@ -285,6 +299,7 @@ def purchase_button(request, game_id):
 @transaction.atomic
 def purchase_time(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
 
     score = game.score
     update_score(score, False)
@@ -328,6 +343,7 @@ def purchase_time(request, game_id):
 @login_required(login_url="/login/")
 def get_predicted_score(request, game_id):
     game = get_object_or_404(Game, id=game_id, user=request.user)
+    if request.user != game.user: return
 
     score = game.score
     update_score(score, True)

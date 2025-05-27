@@ -17,7 +17,6 @@
   width: auto;
   color: var(--main-color);
   padding: 10px;
-  /* line-height: .2; */
   background-color: var(--background-color);
   font-weight: 800;
   z-index: 3;
@@ -35,6 +34,7 @@
   z-index: 2;
   padding: 40px;
 
+  filter: var(--lighten);
 }
 
 .games {
