@@ -1,39 +1,109 @@
 .simple-game {
-  max-height: calc(100vh - 140px);
-  height: 100%;
+  position: relative;
+  display: grid;
+
+  grid-template-columns: 1fr 0fr;
+  grid-template-rows: 100%;
+
+  height: calc(100vh - 70px);
+  width: 100vw;
+  transition: grid-template-columns 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.user-score {
+  font-size: 84px;
+  font-weight: 600;
 }
 
 .simple-game-score {
-  height: 100%;
-  min-width: 50vw;
+  grid-row: 1;
+  grid-column: 1;
+  height: 75%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+  gap: 20px;
   align-items: center;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.game-store {
+  background-color: var(--background-color);
+  grid-column: 2;
+  transition: 0.2s ease-in-out;
+  overflow-y: scroll;
+  border-left: 1px dotted var(--main-color);
+}
+
+.shop-icon {
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: 90px;
+  right: 20px;
+  z-index: 10;
+  filter: var(--lighten);
+}
+
+.simple-game-numbers {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   overflow-y: scroll;
   overflow-x: none;
 }
 
-.simple-game-numbers {
-  height: 100%;
-  min-width: 50vw;
-  overflow-y: scroll;
-  overflow-x: none;
+.unlock-number {
+  gap: 10px;
+}
+
+.game-button {
+  color: var(--background-color);
+  background-color: var(--highlight-color);
+  width: 20vw;
+}
+
+.quantity-button {
+  color: var(--background-color);
+  background-color: var(--highlight-color);
+}
+
+.game-button:hover,
+.quantity-button:hover {
+  color: var(--background-color);
+  background-color: var(--game-button-color);
 }
 
 @media only screen and (max-width: 768px) {
   .simple-game {
-    height: auto;
     max-height: none;
-    width: 100vw;
+    grid-template-columns: 100vw;
+    grid-template-rows: 1fr 0fr;
+    overflow-y: scroll;
   }
 
   .simple-game-score {
-    width: 100vw;
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .simple-game-numbers {
-    width: 100vw;
+  .game-store {
+    grid-column: 1;
+    grid-row: 2;
+    border-left: none;
+    border-top: 1px dotted var(--main-color);
+  }
+
+  .game-button {
+    width: 100%;
+  }
+
+  .user-score {
+    font-size: 42px;
+    font-weight: 600;
   }
 
   .tutorial-section {

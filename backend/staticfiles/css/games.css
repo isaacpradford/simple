@@ -1,13 +1,40 @@
 .games-title {
-  padding: 20px;
+  position: relative;
+  width: auto;
+  height: auto;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto;
+  justify-content: center;
+  align-items: center;
 }
 
 .games-title h1 {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
   width: auto;
   color: var(--main-color);
+  padding: 10px;
+  /* line-height: .2; */
   background-color: var(--background-color);
-  padding: 20px;
   font-weight: 800;
+  z-index: 3;
+}
+
+.games-title-background {
+  grid-column: 1;
+  grid-row: 1;
+  width: 200%;
+
+  position: relative;
+  left: -50%;
+  top: 0;
+
+  z-index: 2;
+  padding: 40px;
+
 }
 
 .games {
@@ -15,9 +42,22 @@
 }
 
 .simple-card {
-  color: var(--button-color);
+  color: var(--main-color);
   background-color: var(--background-color);
   padding: 10px;
   border: 1px solid rgb(219, 219, 219);
   border-radius: 10px;
+  min-width: 350px;
+  height: 132px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.simple-card .blank-button {
+    font-size: 72px;
+    line-height: .75;
+    padding: 0;
 }

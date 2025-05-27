@@ -6,18 +6,14 @@
   display: flex;
   flex-direction: column;
   overflow:hidden;
-  /* justify-content: space-between; */
-  /* align-items: start; */
   z-index: 0;
 }
 
 .landing-background {
   z-index: 1;
-  /* position: absolute; */
   width: 100vw;
   height: calc(100vh - 70px);
-  /* filter: blur(10px); */
-  /* opacity: .2; */
+  filter: var(--lighten);
 }
 
 .landing-content {
@@ -33,7 +29,6 @@
   background-color: var(--background-color);
   z-index: 5;
   height: 40vh;
-  /* padding: 12px; */
 }
 
 .landing-header {

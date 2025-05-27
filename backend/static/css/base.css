@@ -77,13 +77,8 @@ main {
 .simple-icon {
   width: 50px;
   height: 50px;
+  filter: var(--lighten);
 }
-
-/* .simple-logo:hover {
-        color: var(--background-color);
-        background-color: var(--main-color);
-        border-radius: 5px;
-      } */
 
 .simple-title {
   color: var(--button-color);
@@ -135,17 +130,6 @@ main {
 .simple-button:active {
   background-color: var(--game-button-color);
 }
-
-.game-button {
-  color: var(--background-color);
-  background-color: var(--highlight-color);
-}
-.game-button:hover {
-  color: var(--background-color);
-  background-color: var(--game-button-color);
-}
-
-
 
 .blank-button {
   background: none;
@@ -210,6 +194,7 @@ main {
   width: 20px;
   height: 20px;
   background: var(--main-color-opaque);
+  filter: var(--lighten);
   border-radius: 50%;
 }
 

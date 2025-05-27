@@ -68,10 +68,8 @@ def render_game(request, game_id):
 @transaction.atomic
 def click_main_button(request, game_id):
     score = get_object_or_404(Score, game=game_id)
-    update_score(score, False) # Don't update score before clicking button, as this resets the scores timer date to now, which will make 15s increment never hit if they're pressing the button
-
+    # update_score(score, False) # Don't update score before clicking button, as this resets the scores timer date to now, which will make 15s increment never hit if they're pressing the button
     new_score = score.score_value + score.increment
-    score.score_value = new_score
 
     if check_digit_limit(new_score):
          return JsonResponse(
@@ -82,6 +80,7 @@ def click_main_button(request, game_id):
             }
         )
     else:
+        score.score_value += score.increment
         score.save()
 
     return JsonResponse(
@@ -159,7 +158,7 @@ def increase_quantity(request, game_id, number_id, amount):
 
     update_score(score, False)
 
-    cost = ( number.integer * amount * 10 )  # The cost of increasing number quantity is 1x it's size
+    cost = ( (number.integer * amount) * 10 )  # The cost of increasing number quantity is 10x it's size
     
     # Make sure increment doesn't get too big that it breaks the db
     if check_digit_limit(score.increment + (number.integer * amount)):

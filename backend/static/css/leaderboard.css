@@ -4,7 +4,6 @@
 
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     align-items: center;
 }
 
@@ -19,8 +18,10 @@
 
 .simple-table th {
     color: var(--highlight-color);
+    background-color: var(--background-color);
 }
 
 .simple-table td {
     color: var(--highlight-color);
+    background-color: var(--background-color);
 }

@@ -4,6 +4,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'css/tutorial.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'css/tooltip.css' %}" />
+
 <link
   rel="stylesheet"
   type="text/css"
@@ -12,6 +13,9 @@
 
 <script src="{% static 'scripts/formatTimer.js' %}"></script>
 <script src="{% static 'scripts/game/playMessageAnimation.js' %}"></script>
+<script src="{% static 'scripts/game/onLoad.js' %}"></script>
+<!-- <script src="{% static 'scripts/game/shop.js' %}"></script> -->
+<script src="{% static 'scripts/game/tutorial.js' %}"></script>
 <script src="{% static 'scripts/game/updateTimers.js' %}"></script>
 
 <span id="game-id" style="display: none">{{ game.id }}</span>
@@ -95,17 +99,24 @@
 </div>
 {% endif %}
 
+<img
+  src="{% static 'images/shop-icon.svg' %}"
+  alt="Shop icon"
+  class="shop-icon"
+  id="shop-icon"
+/>
+
 <div id="simple-game" class="simple-game">
-  <div class="simple-game-score d-flex flex-column align-items-center">
-    <div
-      class="d-flex flex-column justify-content-center align-items-center p-5"
-    >
-      <h1 class="text-break simple-header" style="font-size: 56px">
+  <div
+    class="simple-game-score d-flex flex-column align-items-center"
+    id="game-score"
+  >
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h1 class="text-break simple-header user-score">
         <span
           class="tooltip-trigger"
           data-tooltip="This number is your Score, which can be used to buy new numbers, buttons, or time."
           id="user-score"
-          style="font-weight: 600; font-size: 84px"
         ></span>
       </h1>
 
@@ -114,7 +125,7 @@
           class="d-flex flex-row gap-1 tooltip-trigger"
           data-tooltip="This number is your Increment, which is the sum total of all of your purchased numbers."
         >
-          <span id="user-increment">{{ score.increment }} / </span>
+          <span id="user-increment">+{{ score.increment }} / </span>
           <span id="time-increment">{{ score.time_increment }}</span>
           <p>seconds</p>
         </div>
@@ -152,15 +163,12 @@
         Click Me
       </button>
 
-      <div
-        class="d-flex flex-row flex-lg-row flex-md-column flex-sm-column gap-2 m-4"
-      >
+      <div class="d-flex flex-column flex-lg-row flex-md-row flex-sm-row gap-2">
         {% if next_button != 1000 %}
         <button
           id="purchase-next-button"
           class="btn game-button tooltip-trigger"
           data-tooltip="Purchasing this will add a new +/- button to each of your numbers, letting you buy more, faster."
-          style="width: 20vw"
         >
           Add +/- {{ next_button }} (Cost: {{ next_button_cost }})
         </button>
@@ -169,7 +177,6 @@
           id="purchase-next-second"
           class="btn game-button tooltip-trigger"
           data-tooltip="Subtract a second from your timer."
-          style="width: 20vw"
         >
           -1s (Cost:<span id="next-second-cost"> {{ next_second_cost }}</span>)
         </button>
@@ -178,17 +185,17 @@
     </div>
   </div>
 
-  <div id="game-store">
+  <div class="game-store" id="game-store">
     <ul class="simple-game-numbers">
       <div
-        class="purchase-numbers d-flex flex-column justify-content-center align-items-center p-5"
+        class="unlock-number d-flex flex-column justify-content-center align-items-center p-5 g-5"
       >
         <!-- <h1 class="simple-header" style="font-size: 18px; font-weight: 600">
-      Next Number:
-    </h1> -->
+          Next Number:
+        </h1> -->
         <h2 class="simple-paragraph d-flex flex-column align-items-center">
           <span id="next_number" style="font-size: 72px; font-weight: 600"
-            >+{{ form.next_integer }}</span
+            >{{ form.next_integer }}</span
           >
           <span id="next_number_cost" style="font-size: 16px; font-weight: 300"
             >Costs: {{ form.next_integer_cost }}</span
@@ -198,7 +205,7 @@
         <button
           id="purchase-next-number"
           class="purchase-next-number btn game-button tooltip-trigger"
-          data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost twice their size to unlock."
+          data-tooltip="Purchase this number to unlock it and add the number to your increment. Numbers cost 100x their size to unlock."
         >
           Unlock
         </button>
@@ -231,7 +238,7 @@
                     data-action="increase"
                     data-id="{{ number.id }}"
                     data-amount="{{ amount }}"
-                    class="update-button btn game-button"
+                    class="update-button btn quantity-button"
                   >
                     +{{ amount }}
                   </button>
@@ -240,7 +247,7 @@
                     data-action="decrease"
                     data-id="{{ number.id }}"
                     data-amount="{{ amount }}"
-                    class="update-button btn game-button"
+                    class="update-button btn quantity-button"
                   >
                     -{{ amount }}
                   </button>
@@ -269,6 +276,13 @@
     if (scoreInterval) clearInterval(scoreInterval);
     scoreInterval = setInterval(updateScore, updateInterval);
   }
+
+  // Event listener to close tutorial
+  let closeButton = document.getElementById("close-tutorial");
+  closeTutorial(closeButton);
+
+  // Load the tutorial and tooltips unless tooltips is false (set in settings)
+  loadTooltipsAndTutorial();
 
   // Click the 'click me' button and increase score
   const clickButton = document.getElementById("main-button");
@@ -409,7 +423,7 @@
         if (data.success) {
           document.getElementById("user-score").textContent = data.new_score;
           document.getElementById("user-increment").textContent =
-            data.new_increment + " /";
+            "+" + data.new_increment + " /";
           button.closest("li").querySelector("p").textContent =
             data.new_quantity;
           playMessageAnimation(data.success, e.target, data.message);
@@ -443,9 +457,8 @@
 
           document.getElementById("user-score").textContent = data.new_score;
           document.getElementById("user-increment").textContent =
-            data.new_increment + " / ";
-          document.getElementById("next_number").textContent =
-            "+" + data.next_number;
+            "+" + data.new_increment + " / ";
+          document.getElementById("next_number").textContent = data.next_number;
           document.getElementById("next_number_cost").textContent =
             "Costs: " + data.next_number_cost;
 
@@ -457,7 +470,7 @@
               data-action="increase"
               data-id="${data.number_id}"
               data-amount="${amount}"
-              class="update-button btn game-button"
+              class="update-button btn quantity-button"
             >
               +${amount}
             </button>
@@ -472,7 +485,7 @@
               data-action="decrease"
               data-id="${data.number_id}"
               data-amount="${amount}"
-              class="update-button btn game-button"
+              class="update-button btn quantity-button"
             >
               -${amount}
             </button>
@@ -510,49 +523,6 @@
       }
     });
 
-  let closeTutorial = document.getElementById("close-tutorial");
-  if (closeTutorial) {
-    closeTutorial.addEventListener("click", () => {
-      document.getElementById("tutorial").style.display = "none";
-      game.style.opacity = 1;
-      game.style.filter = "blur(0px)";
-    });
-  }
-
-  // Load the tooltips unless tooltips is false (set in settings)
-  document.addEventListener("DOMContentLoaded", () => {
-    const tutorialOpen = document.getElementById("tutorial");
-    console.log(tutorialOpen);
-    if (tutorialOpen) {
-      game.style.opacity = 0.2;
-      game.style.filter = "blur(2px)";
-    }
-
-    const tooltipEnabled = localStorage.getItem("tooltips") == "true";
-    if (!tooltipEnabled) return;
-
-    const tooltip = document.createElement("div");
-    tooltip.className = "tooltip";
-    document.body.appendChild(tooltip);
-
-    document.querySelectorAll("[data-tooltip]").forEach((el) => {
-      el.addEventListener("mouseenter", (e) => {
-        const message = el.getAttribute("data-tooltip");
-        tooltip.textContent = message;
-        tooltip.classList.add("show");
-      });
-
-      el.addEventListener("mousemove", (e) => {
-        tooltip.style.left = e.pageX + 10 + "px";
-        tooltip.style.top = e.pageY + 10 + "px";
-      });
-
-      el.addEventListener("mouseleave", () => {
-        tooltip.classList.remove("show");
-      });
-    });
-  });
-
   function updateScore() {
     fetch("{% url 'predicted_score' game.id %}")
       .then((response) => response.json())
@@ -560,7 +530,7 @@
         document.getElementById("user-score").textContent = data.score;
         document.getElementById(
           "user-increment"
-        ).textContent = `${data.increment} / `;
+        ).textContent = `+${data.increment} / `;
         lastScoreUpdate = Date.now();
         playMessageAnimation(
           true,
